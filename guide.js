@@ -161,14 +161,16 @@
                 ball.classification !== root.LogicalBall.BALL_CLASSIFICATION_VIRTUAL;
         }
         if (mode === 'eight' && options.eightBallAllButBlack) {
-            return balls.filter(function (ball) {
+            var numbered = balls.filter(function (ball) {
                 return available(ball) && ball.number >= 1 && ball.number <= 15 && ball.number !== 8;
             });
+            if (numbered.length) { return numbered; }
         }
         if (mode === 'snooker' && options.snookerAllReds) {
-            return isSnookerRed(target) ? balls.filter(function (ball) {
+            var reds = balls.filter(function (ball) {
                 return available(ball) && isSnookerRed(ball);
-            }) : [];
+            });
+            if (reds.length) { return isSnookerRed(target) ? reds : []; }
         }
         return options.firstHitPocket ? [target] : [];
     }
@@ -277,20 +279,23 @@
                 var candidates = [];
                 var options = shot.options;
                 var live = current.settings;
-                // A mode-specific sweep suppresses the single-ball option for that whole shot.
-                // Thus a black-eight contact cannot be potted by the single-ball option during an eight-ball sweep.
+                var selection = {firstHitPocket: firstContact && options.firstHitPocket && live.firstHitPocket,
+                    snookerAllReds: options.snookerAllReds && live.snookerAllReds,
+                    eightBallAllButBlack: options.eightBallAllButBlack && live.eightBallAllButBlack};
+                // A sweep takes priority while eligible balls remain. Once cleared, only the
+                // armed first contact may fall back to single-ball entry on a later shot.
                 if (shot.mode === 'eight' && options.eightBallAllButBlack) {
                     if (!shot.sweepUsed && live.eightBallAllButBlack) {
-                        shot.sweepUsed = true;
-                        candidates = selectPocketCandidates(this, target, options, shot.mode);
+                        candidates = selectPocketCandidates(this, target, selection, shot.mode);
+                        if (candidates.length) { shot.sweepUsed = true; }
                     }
                 } else if (shot.mode === 'snooker' && options.snookerAllReds) {
-                    if (!shot.sweepUsed && live.snookerAllReds && isSnookerRed(target)) {
-                        shot.sweepUsed = true;
-                        candidates = selectPocketCandidates(this, target, options, shot.mode);
+                    if (!shot.sweepUsed && live.snookerAllReds) {
+                        candidates = selectPocketCandidates(this, target, selection, shot.mode);
+                        if (candidates.length) { shot.sweepUsed = true; }
                     }
                 } else if (firstContact && options.firstHitPocket && live.firstHitPocket) {
-                    candidates = selectPocketCandidates(this, target, options, shot.mode);
+                    candidates = selectPocketCandidates(this, target, selection, shot.mode);
                 }
                 var errors = [];
                 for (var i = 0; i < candidates.length; i++) {

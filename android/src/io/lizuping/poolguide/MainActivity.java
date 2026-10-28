@@ -60,7 +60,7 @@ public final class MainActivity extends Activity {
         page.setPadding(dp(24), dp(22), dp(24), dp(30));
         scroll.addView(page, new ScrollView.LayoutParams(-1, -2));
 
-        TextView eyebrow = label("POOL GUIDE   /   1.5", 12, ACCENT);
+        TextView eyebrow = label("POOL GUIDE   /   1.5.1", 12, ACCENT);
         eyebrow.setLetterSpacing(.14f);
         page.addView(eyebrow);
         TextView title = label("辅助线加长", 30, TEXT);
@@ -148,7 +148,7 @@ public final class MainActivity extends Activity {
         add(settings, snookerReds, 4, 0);
         eightSweep = pocketSwitch("启动时开启中八非黑八全入袋", R.id.eight_ball_all_but_black);
         add(settings, eightSweep, 4, 0);
-        add(settings, label("应用后，在游戏内展开“入袋开关”可动态切换三项功能。开启从下一杆生效，关闭阻止后续触发；已入袋球不会还原。斯诺克碰红收全红，中八碰目标球收非黑八；模式专用开关优先，原有犯规规则继续生效。", 12, MUTED), 9, 0);
+        add(settings, label("应用后，在游戏内展开“入袋开关”可动态切换三项功能。开启从下一杆生效，关闭阻止后续触发；已入袋球不会还原。斯诺克碰红收全红，中八碰目标球收非黑八；全入清完后由已开启的首碰接管剩余球，原有犯规规则继续生效。", 12, MUTED), 9, 0);
         add(page, settings, 0, 20);
         modes.setOnCheckedChangeListener((group, checked) -> updateMode());
 

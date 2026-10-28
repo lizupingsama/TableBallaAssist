@@ -91,7 +91,7 @@
             pocketHint = doc.createElement('div');
             pocketHint.style.cssText = 'font-size:10px;color:#b3cdc9;max-width:240px;margin-top:6px;';
             pocketHint.setAttribute('aria-live', 'polite');
-            pocketHint.textContent = '开启从下一杆生效；模式专用开关优先，原有犯规规则继续生效。';
+            pocketHint.textContent = '开启从下一杆生效；全入清完后由已开启的首碰接管剩余球，原有犯规规则继续生效。';
             pocketPanel.appendChild(pocketHint);
             expand.addEventListener('click', function (event) {
                 event.stopPropagation();

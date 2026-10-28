@@ -150,6 +150,48 @@ test('sweeps skip duplicate records when only a subset remains on the table', ()
     assert.equal(f.pockets().length, 13);
 });
 
+test('after an eight-ball sweep, first-hit pocket can handle the remaining black eight on the next shot', () => {
+    const f = eight();
+    f.call('apply', {eightBallAllButBlack: true});
+    f.shoot(); f.collide();
+    assert.equal(f.pockets().length, 14);
+    assert.equal(f.black.state, f.s.LogicalBall.nSTATE_IN_PLAY);
+    f.s.__poolGuideExtender.configurePocket('firstHitPocket', true);
+    assert.deepEqual(Array.from(f.s.__poolGuideExtender.previewPocketCandidates(f.table, f.black)), [f.black]);
+    f.shoot(); f.collide(f.balls[0], f.black);
+    assert.equal(f.pockets().length, 1);
+    assert.equal(f.pockets()[0].ball, f.black);
+});
+
+test('after all reds are cleared, first-hit pocket handles a colored ball while the red sweep stays enabled', () => {
+    const f = snooker();
+    f.call('apply', {snookerAllReds: true});
+    f.shoot(); f.collide();
+    assert.equal(f.pockets().length, 15);
+    f.s.__poolGuideExtender.configurePocket('firstHitPocket', true);
+    assert.deepEqual(Array.from(f.s.__poolGuideExtender.previewPocketCandidates(f.table, f.colors[0])), [f.colors[0]]);
+    f.shoot(); f.collide(f.balls[0], f.colors[0]);
+    assert.equal(f.pockets().length, 1);
+    assert.equal(f.pockets()[0].ball, f.colors[0]);
+    f.collide(f.balls[0], f.colors[1]);
+    assert.equal(f.pockets().length, 1, 'only the first contact may fall back after a sweep');
+    assert.equal(f.colors[1].state, f.s.LogicalBall.nSTATE_IN_PLAY);
+});
+
+test('cleared sweeps do not pot the remaining ball unless first-hit was enabled before the shot and stays on', () => {
+    for (const enabled of [false, true]) {
+        const f = eight();
+        f.call('apply', {eightBallAllButBlack: true}); f.shoot(); f.collide();
+        const state = f.s.__poolGuideExtender;
+        if (enabled) { state.configurePocket('firstHitPocket', true); }
+        f.shoot();
+        if (enabled) { state.configurePocket('firstHitPocket', false); }
+        f.collide(f.balls[0], f.black);
+        assert.equal(f.pockets().length, 0);
+        assert.equal(f.black.state, f.s.LogicalBall.nSTATE_IN_PLAY);
+    }
+});
+
 test('dynamic options reject unknown names and incompatible APIs without corrupting existing settings', () => {
     const f = fixture(); f.call('apply'); const state = f.s.__poolGuideExtender;
     assert.throws(() => state.configurePocket('foo', true));
