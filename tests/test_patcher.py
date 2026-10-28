@@ -3,12 +3,24 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from guide_extender import START, ToolError, build_patch, digest, split_patch
+from guide_extender import START, ToolError, build_patch, digest, split_patch, validate_settings
 
 SOURCE = b'<html><body><script src="manifest.json"></script></body></html>'
 
 
 class PatchTests(unittest.TestCase):
+    def test_legacy_settings_disable_banks_by_default(self):
+        self.assertFalse(validate_settings({})["bankPrediction"])
+
+    def test_bank_toggle_survives_patch_round_trip_and_reapplication(self):
+        patched = build_patch(SOURCE, {"bankPrediction": True})
+        base, config = split_patch(patched)
+        self.assertEqual(base, SOURCE)
+        self.assertTrue(config["settings"]["bankPrediction"])
+        updated = build_patch(patched, {"bankPrediction": False})
+        self.assertFalse(split_patch(updated)[1]["settings"]["bankPrediction"])
+        self.assertEqual(updated.count(START), 1)
+
     def test_append_preserves_original_and_round_trips(self):
         patched = build_patch(SOURCE, {"length": 220})
         base, config = split_patch(patched)

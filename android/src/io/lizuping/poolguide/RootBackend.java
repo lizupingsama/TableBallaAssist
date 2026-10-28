@@ -204,6 +204,14 @@ public final class RootBackend {
                     throw new Exception("游戏的辅助线接口已改变，当前版本暂不适配，未作修改。");
                 }
             }
+            if (settings.bankPrediction) {
+                String[] bankRequired = {"findFirstCollisionBall", "ballLineCollision", "ballBallCollision", "BallLineCollision", "m_cTableShape"};
+                for (String key : bankRequired) {
+                    if (!source.contains(key)) {
+                        throw new Exception("游戏的库边碰撞接口已改变，当前版本暂不支持反弹预测，未作修改。");
+                    }
+                }
+            }
         }
         byte[] replacement = "apply".equals(action) ? PatchEngine.build(current, settings, loader()) : snapshot.base;
         String baseHash = PatchEngine.sha256(snapshot.base);

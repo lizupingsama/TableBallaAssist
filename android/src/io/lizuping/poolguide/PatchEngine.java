@@ -19,8 +19,13 @@ public final class PatchEngine {
         public final double length;
         public final double factor;
         public final boolean showSplit;
+        public final boolean bankPrediction;
 
         public Settings(String mode, double length, double factor, boolean showSplit) {
+            this(mode, length, factor, showSplit, false);
+        }
+
+        public Settings(String mode, double length, double factor, boolean showSplit, boolean bankPrediction) {
             if ((!"fixed".equals(mode) && !"multiply".equals(mode)) ||
                     !Double.isFinite(length) || length < 10 || length > 1500 ||
                     !Double.isFinite(factor) || factor < 1 || factor > 30) {
@@ -30,6 +35,7 @@ public final class PatchEngine {
             this.length = length;
             this.factor = factor;
             this.showSplit = showSplit;
+            this.bankPrediction = bankPrediction;
         }
 
         public JSONObject json() throws Exception {
@@ -38,12 +44,13 @@ public final class PatchEngine {
             json.put("length", length);
             json.put("factor", factor);
             json.put("showSplit", showSplit);
+            json.put("bankPrediction", bankPrediction);
             return json;
         }
 
         public static Settings from(JSONObject json) throws Exception {
             return new Settings(json.getString("mode"), json.getDouble("length"),
-                    json.getDouble("factor"), json.getBoolean("showSplit"));
+                    json.getDouble("factor"), json.getBoolean("showSplit"), json.optBoolean("bankPrediction", false));
         }
     }
 

@@ -16,6 +16,13 @@
   "original_entry_sha256": "56cfb57cdd3691e89c4d107be2301c50d015e463f4c059dec8aebbe5e4948619",
   "restored_entry_sha256": "56cfb57cdd3691e89c4d107be2301c50d015e463f4c059dec8aebbe5e4948619",
   "final_entry_sha256": "254fa7d2c45b3c675d7790393f0878b78b8257fcba507501a9c0319a6682be36",
-  "final_settings": {"mode": "fixed", "length": 220, "factor": 6, "showSplit": true},
-  "limitations": "Device remained at game-server login during observation; actual table appearance has not been verified. Lines are straight extrapolations and do not predict subsequent collisions."
+  "final_settings": {
+    "mode": "fixed",
+    "length": 220,
+    "factor": 6,
+    "showSplit": true
+  },
+  "limitations": "Device remained at game-server login during observation; actual table appearance has not been verified. Lines are straight extrapolations and do not predict subsequent collisions.",
+  "tool_version": "1.0.0",
+  "record_kind": "historical_device_validation"
 }

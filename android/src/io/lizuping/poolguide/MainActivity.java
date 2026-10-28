@@ -18,6 +18,7 @@ import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.ScrollView;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,6 +41,7 @@ public final class MainActivity extends Activity {
     private EditText length;
     private EditText factor;
     private CheckBox split;
+    private Switch banks;
     private LinearLayout lengthRow;
     private LinearLayout factorRow;
     private volatile boolean busy;
@@ -55,7 +57,7 @@ public final class MainActivity extends Activity {
         page.setPadding(dp(24), dp(22), dp(24), dp(30));
         scroll.addView(page, new ScrollView.LayoutParams(-1, -2));
 
-        TextView eyebrow = label("POOL GUIDE   /   1.0", 12, ACCENT);
+        TextView eyebrow = label("POOL GUIDE   /   1.1", 12, ACCENT);
         eyebrow.setLetterSpacing(.14f);
         page.addView(eyebrow);
         TextView title = label("辅助线加长", 30, TEXT);
@@ -76,7 +78,7 @@ public final class MainActivity extends Activity {
         add(page, statusCard, 0, 16);
 
         LinearLayout settings = card();
-        TextView heading = label("线长设置", 19, TEXT);
+        TextView heading = label("辅助线设置", 19, TEXT);
         heading.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         settings.addView(heading);
         modes = new RadioGroup(this);
@@ -107,7 +109,23 @@ public final class MainActivity extends Activity {
         split.setButtonTintList(ColorStateList.valueOf(ACCENT));
         controls.add(split);
         settings.addView(split);
-        add(settings, label("长线用于观察方向，不包含后续碰撞和反弹预测。", 12, MUTED), 9, 0);
+        banks = new Switch(this);
+        banks.setId(R.id.bank_prediction);
+        banks.setText("库边反弹预测（最多 3 次）");
+        banks.setTextSize(14);
+        banks.setTextColor(TEXT);
+        banks.setChecked(false);
+        banks.setMinHeight(dp(48));
+        banks.setSwitchPadding(dp(12));
+        banks.setShowText(false);
+        banks.setThumbTintList(new ColorStateList(new int[][]{{android.R.attr.state_checked}, {}},
+                new int[]{ACCENT, MUTED}));
+        banks.setTrackTintList(new ColorStateList(new int[][]{{android.R.attr.state_checked}, {}},
+                new int[]{Color.rgb(44, 119, 108), Color.rgb(60, 79, 85)}));
+        banks.setOnCheckedChangeListener((button, checked) -> updateMode());
+        controls.add(banks);
+        settings.addView(banks);
+        add(settings, label("开启后按撞库次数绘制，遇后续碰球或袋口停止。青色为母球，黄色为目标球；目标球轨迹需启用分裂线。关闭后使用上面的直线长度设置。", 12, MUTED), 9, 0);
         add(page, settings, 0, 20);
         modes.setOnCheckedChangeListener((group, checked) -> updateMode());
 
@@ -204,6 +222,8 @@ public final class MainActivity extends Activity {
         boolean fixed = modes.getCheckedRadioButtonId() == R.id.mode_fixed;
         lengthRow.setVisibility(fixed ? View.VISIBLE : View.GONE);
         factorRow.setVisibility(fixed ? View.GONE : View.VISIBLE);
+        length.setEnabled(!busy && !banks.isChecked());
+        factor.setEnabled(!busy && !banks.isChecked());
     }
 
     private void setInputs(PatchEngine.Settings settings) {
@@ -211,6 +231,7 @@ public final class MainActivity extends Activity {
         length.setText(format(settings.length));
         factor.setText(format(settings.factor));
         split.setChecked(settings.showSplit);
+        banks.setChecked(settings.bankPrediction);
     }
 
     private String format(double value) {
@@ -222,7 +243,8 @@ public final class MainActivity extends Activity {
         try {
             setInputs(new PatchEngine.Settings(saved.getString("mode", "fixed"),
                     Double.parseDouble(saved.getString("length", "220")),
-                    Double.parseDouble(saved.getString("factor", "6")), saved.getBoolean("split", true)));
+                    Double.parseDouble(saved.getString("factor", "6")), saved.getBoolean("split", true),
+                    saved.getBoolean("banks", false)));
         } catch (Exception ignored) {}
     }
 
@@ -233,7 +255,7 @@ public final class MainActivity extends Activity {
         PatchEngine.Settings settings;
         try {
             settings = new PatchEngine.Settings(modes.getCheckedRadioButtonId() == R.id.mode_fixed ? "fixed" : "multiply",
-                    Double.parseDouble(length.getText().toString()), Double.parseDouble(factor.getText().toString()), split.isChecked());
+                    Double.parseDouble(length.getText().toString()), Double.parseDouble(factor.getText().toString()), split.isChecked(), banks.isChecked());
         } catch (Exception error) {
             state.setText("请输入 10–1500 的长度和 1–30 的倍数。");
             return;
@@ -254,7 +276,8 @@ public final class MainActivity extends Activity {
                         getPreferences(MODE_PRIVATE).edit().putString("mode", result.snapshot.settings.mode)
                                 .putString("length", Double.toString(result.snapshot.settings.length))
                                 .putString("factor", Double.toString(result.snapshot.settings.factor))
-                                .putBoolean("split", result.snapshot.settings.showSplit).apply();
+                                .putBoolean("split", result.snapshot.settings.showSplit)
+                                .putBoolean("banks", result.snapshot.settings.bankPrediction).apply();
                     }
                     if (!"status".equals(action)) {
                         Toast.makeText(this, result.message, Toast.LENGTH_LONG).show();
@@ -277,6 +300,7 @@ public final class MainActivity extends Activity {
         for (View control : controls) {
             control.setEnabled(true);
         }
+        updateMode();
     }
 
     private void openGame() {

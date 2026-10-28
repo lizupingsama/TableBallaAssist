@@ -1,26 +1,41 @@
 {
   "date": "2026-10-28",
-  "apk": "PoolGuide-1.0.0.apk",
+  "version": "1.1.0",
+  "apk": "PoolGuide-1.1.0.apk",
   "package": "io.lizuping.poolguide",
-  "bytes": 29211,
-  "apk_sha256": "78a1f2419a6ecd4af6aa8b7daff5a720fb76356c07f7e22fea9b7026acc4ce9c",
+  "bytes": 33307,
+  "apk_sha256": "18f034fed619cb33b2e4037e3a04c13383e46e2866c4f17fbbcaed88d650b82b",
   "certificate_sha256": "827d67839b54702b32333f94fd73b5b0e7ee02e62bf4ed74f801cf72e864668f",
-  "device": "Redmi K50 / Android 13 / Magisk Delta",
   "checks": {
+    "javascript_tests_passed": 22,
+    "python_tests_passed": 8,
+    "java_patch_checks": 15,
+    "cross_language_checks": 8,
+    "aim_angles_checked": 120,
     "apk_signature_v2": true,
     "apk_signature_v3": true,
     "zip_alignment": true,
+    "same_signing_certificate_as_1_0_0": true,
+    "packaged_bank_loader_present": true,
     "installed_and_launched": true,
-    "root_status_from_apk": true,
-    "restore_from_apk": true,
-    "apply_from_apk": true,
-    "loaded_badge_observed_in_game_lobby": true,
-    "java_patch_checks": 11,
-    "cross_language_checks": 6,
-    "existing_js_python_checks": 15,
-    "live_table_trajectory_verified": false
+    "live_table_trajectory_verified": false,
+    "native_bank_switch_found": true,
+    "bank_loader_badge_observed_in_game_lobby": true
   },
-  "restored_entry_sha256": "56cfb57cdd3691e89c4d107be2301c50d015e463f4c059dec8aebbe5e4948619",
-  "final_entry_sha256": "9ef4fde167fd4371cc66919f45f5e82830f5e841aec26e36cc1cba6de2919fcf",
-  "final_settings": {"mode": "fixed", "length": 220, "factor": 6, "showSplit": true}
+  "defaults": {
+    "bankPrediction": false,
+    "max_cushion_reflections_per_path": 3
+  },
+  "limitations": [
+    "Installed and native switch inspected on device; bank badge observed in game lobby. Actual table trajectories have not been verified.",
+    "Direction preview starts without player-selected spin and does not model shot power, cloth slowdown or final resting position.",
+    "Paths stop at subsequent balls, pocket capture circles or pocket-jaw point collisions."
+  ],
+  "previous_device_validation": {
+    "version": "1.0.0",
+    "date": "2026-10-28",
+    "device": "Redmi K50 / Android 13 / Magisk Delta",
+    "reference": "README.md"
+  },
+  "device": "Redmi K50 / Android 13 / model 22011211C"
 }

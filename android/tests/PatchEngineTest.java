@@ -23,17 +23,23 @@ public final class PatchEngineTest {
         check(parsed.installed(), "desktop patch recognized");
         check(Arrays.equals(parsed.base, original), "desktop base preserved byte for byte");
         check(parsed.settings.length == 220, "desktop settings recognized");
-        PatchEngine.Settings fixed = new PatchEngine.Settings("fixed", 300, 6, true);
+        check(parsed.settings.bankPrediction, "desktop bank toggle recognized");
+        org.json.JSONObject legacy = new PatchEngine.Settings("fixed", 220, 6, true).json();
+        legacy.remove("bankPrediction");
+        check(!PatchEngine.Settings.from(legacy).bankPrediction, "legacy patches default to banks disabled");
+        PatchEngine.Settings fixed = new PatchEngine.Settings("fixed", 300, 6, true, true);
         byte[] mobile = PatchEngine.build(desktop, fixed, loader);
         PatchEngine.Snapshot split = PatchEngine.split(mobile);
         check(Arrays.equals(split.base, original), "Android restore round trip");
         check(split.settings.length == 300, "Android fixed length changed");
+        check(split.settings.bankPrediction, "Android bank toggle preserved");
         byte[] second = PatchEngine.build(mobile, fixed, loader);
         check(Arrays.equals(mobile, second), "Android apply is idempotent");
         PatchEngine.Settings multiplied = new PatchEngine.Settings("multiply", 220, 8, false);
         byte[] multiple = PatchEngine.build(mobile, multiplied, loader);
         check(PatchEngine.split(multiple).settings.factor == 8, "multiplier updated");
         check(!PatchEngine.split(multiple).settings.showSplit, "split option preserved");
+        check(!PatchEngine.split(multiple).settings.bankPrediction, "bank toggle can be turned off");
         boolean rejected = false;
         try { PatchEngine.split(("<!-- changed -->" + new String(mobile, StandardCharsets.UTF_8)).getBytes(StandardCharsets.UTF_8)); }
         catch (Exception expected) { rejected = true; }

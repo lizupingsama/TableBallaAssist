@@ -57,7 +57,8 @@ def validate_settings(settings: dict) -> dict:
     factor = float(settings.get("factor", 6))
     if mode not in ("fixed", "multiply") or not math.isfinite(length) or not 10 <= length <= 1500 or not math.isfinite(factor) or not 1 <= factor <= 30:
         raise ToolError("固定长度需为 10–1500，倍数需为 1–30。")
-    return {"mode": mode, "length": length, "factor": factor, "showSplit": bool(settings.get("showSplit", True))}
+    return {"mode": mode, "length": length, "factor": factor, "showSplit": bool(settings.get("showSplit", True)),
+            "bankPrediction": bool(settings.get("bankPrediction", False))}
 
 
 def build_patch(content: bytes, settings: dict) -> bytes:
@@ -68,7 +69,7 @@ def build_patch(content: bytes, settings: dict) -> bytes:
     config = {"base_sha256": digest(base), "settings": validate_settings(settings)}
     request = json.dumps({"action": "apply", "settings": config["settings"]}, separators=(",", ":"))
     hook = (ROOT / "guide.js").read_text(encoding="utf-8").rstrip().rstrip(";")
-    payload = "(function(){var attempts=0;function install(){if(typeof window.VisualGuide!=='function'){if(++attempts<2400){setTimeout(install,250);}return;}try{window.__poolGuideRequest=" + request + ";var result=(" + hook + ");window.__poolGuideLoadResult=result;if(result.ok&&result.installed){var badge=document.createElement('div');badge.id='poolguide-status';badge.textContent='辅助线 '+(result.settings.mode==='fixed'?result.settings.length:result.settings.factor+'x');badge.style.cssText='position:fixed;right:8px;bottom:5px;z-index:2147483647;pointer-events:none;color:#79fff0;background:rgba(0,0,0,.5);padding:3px 7px;border-radius:4px;font:12px sans-serif;';document.body.appendChild(badge);}console.info('POOL_GUIDE_EXTENDER '+JSON.stringify(result));}catch(e){window.__poolGuideLoadResult={ok:false,reason:String(e)};console.error('POOL_GUIDE_EXTENDER '+e);}finally{delete window.__poolGuideRequest;}}install();}());"
+    payload = "(function(){var attempts=0;function install(){if(typeof window.VisualGuide!=='function'){if(++attempts<2400){setTimeout(install,250);}return;}try{window.__poolGuideRequest=" + request + ";var result=(" + hook + ");window.__poolGuideLoadResult=result;if(result.ok&&result.installed){var badge=document.createElement('div');badge.id='poolguide-status';badge.textContent=result.settings.bankPrediction?'反弹预测 · 最多3次':'辅助线 '+(result.settings.mode==='fixed'?result.settings.length:result.settings.factor+'x');badge.style.cssText='position:fixed;right:8px;bottom:5px;z-index:2147483647;pointer-events:none;color:#79fff0;background:rgba(0,0,0,.5);padding:3px 7px;border-radius:4px;font:12px sans-serif;';document.body.appendChild(badge);}console.info('POOL_GUIDE_EXTENDER '+JSON.stringify(result));}catch(e){window.__poolGuideLoadResult={ok:false,reason:String(e)};console.error('POOL_GUIDE_EXTENDER '+e);}finally{delete window.__poolGuideRequest;}}install();}());"
     metadata = json.dumps(config, separators=(",", ":")).encode("utf-8")
     addition = START + CONFIG + metadata + b" -->\n<script>\n" + payload.encode("utf-8") + b"\n</script>" + END
     return base[:position] + addition + base[position:]
@@ -151,6 +152,8 @@ class Connection:
         if action == "apply":
             logic = self.read(GAME_JS).decode("utf-8")
             required = ["var VisualGuide=", "calculateGuideLength", "calculateGuideLength2", "drawGuideLessSharpAngle", "isOpenFuZhu"]
+            if (settings or {}).get("bankPrediction", False):
+                required += ["findFirstCollisionBall", "ballLineCollision", "ballBallCollision", "BallLineCollision", "m_cTableShape"]
             if any(key not in logic for key in required):
                 raise ToolError("当前主脚本的辅助线结构与已分析版本不匹配，未作修改。")
         replacement = build_patch(current, settings or {}) if action == "apply" else base
@@ -217,8 +220,8 @@ def gui(serial: str | None):
 
     root = tk.Tk()
     root.title("超级台球大师 · 辅助线加长")
-    root.geometry("640x500")
-    root.minsize(600, 480)
+    root.geometry("640x580")
+    root.minsize(600, 560)
     events = queue.Queue()
     backend = Connection(serial, lambda value: events.put(("log", value)))
     frame = ttk.Frame(root, padding=22)
@@ -229,6 +232,7 @@ def gui(serial: str | None):
     length = tk.StringVar(value="220")
     factor = tk.StringVar(value="6")
     split = tk.BooleanVar(value=True)
+    banks = tk.BooleanVar(value=False)
     grid = ttk.Frame(frame)
     grid.pack(fill="x")
     for row, label in enumerate(["加长方式", "固定长度（逻辑单位）", "加长倍数"]):
@@ -237,7 +241,8 @@ def gui(serial: str | None):
     ttk.Spinbox(grid, from_=10, to=1500, increment=10, textvariable=length, width=22).grid(row=1, column=1, padx=12)
     ttk.Spinbox(grid, from_=1, to=30, textvariable=factor, width=22).grid(row=2, column=1, padx=12)
     ttk.Checkbutton(frame, text="同时显示碰撞后的分裂线", variable=split).pack(anchor="w", pady=12)
-    ttk.Label(frame, text="请先结束当前对局。进入练习球桌后转动球杆查看效果。\n这里只延长直线，不预测后续碰撞或反弹；长度过大时会穿过库边。", wraplength=590).pack(anchor="w")
+    ttk.Checkbutton(frame, text="库边反弹预测（最多 3 次）", variable=banks).pack(anchor="w")
+    ttk.Label(frame, text="反弹预测开启后按撞库次数绘制，遇后续碰球或袋口停止。\n青色为母球，黄色为目标球；目标球轨迹需启用分裂线。", wraplength=590).pack(anchor="w", pady=(8, 0))
     actions = ttk.Frame(frame)
     actions.pack(fill="x", pady=16)
     status = tk.StringVar(value="尚未连接。关闭面板会保留设置，可随时再次打开并恢复。")
@@ -250,7 +255,7 @@ def gui(serial: str | None):
         if busy:
             return
         try:
-            config = validate_settings({"mode": "fixed" if mode.get() == "固定长度" else "multiply", "length": float(length.get()), "factor": float(factor.get()), "showSplit": split.get()})
+            config = validate_settings({"mode": "fixed" if mode.get() == "固定长度" else "multiply", "length": float(length.get()), "factor": float(factor.get()), "showSplit": split.get(), "bankPrediction": banks.get()})
         except (ValueError, ToolError) as error:
             status.set(str(error))
             return
@@ -294,6 +299,7 @@ def gui(serial: str | None):
                 length.set(str(current["length"]))
                 factor.set(str(current["factor"]))
                 split.set(current["showSplit"])
+                banks.set(current.get("bankPrediction", False))
                 status.set("已写入加长补丁并重启游戏，进入练习球桌查看。" if action == "apply" else "手机已连接，当前已安装加长补丁。")
             else:
                 status.set("已恢复原脚本并重启游戏。" if action == "restore" and result.get("restarted") else "手机已连接，当前为原始线长。")
@@ -320,12 +326,13 @@ def main():
     parser.add_argument("--length", type=float, default=220)
     parser.add_argument("--factor", type=float, default=6)
     parser.add_argument("--keep-split-setting", action="store_true")
+    parser.add_argument("--bank-prediction", action="store_true", help="预测母球和首碰目标球最多 3 次撞库")
     args = parser.parse_args()
     if args.action == "gui":
         gui(args.serial)
     else:
         connection = Connection(args.serial, lambda text: print(text, file=sys.stderr, flush=True))
-        result = connection.execute(args.action, {"mode": args.mode, "length": args.length, "factor": args.factor, "showSplit": not args.keep_split_setting})
+        result = connection.execute(args.action, {"mode": args.mode, "length": args.length, "factor": args.factor, "showSplit": not args.keep_split_setting, "bankPrediction": args.bank_prediction})
         print(json.dumps(result, ensure_ascii=False, indent=2))
 
 
