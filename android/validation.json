@@ -20,8 +20,12 @@
     "installed_version_code": 5,
     "installed_version_name": "1.4.0",
     "live_toggle_without_restart_verified_on_prior_build": true,
-    "final_patch_apply_pending": true,
-    "live_trajectory_accuracy_quantified": false
+    "final_patch_apply_pending": false,
+    "live_trajectory_accuracy_quantified": false,
+    "latest_loader_applied_and_hash_verified": true,
+    "live_toggle_without_restart_verified": true,
+    "live_cushion_count_buttons_verified": true,
+    "device_entry_sha256": "9a4f31e48032ae731f5917030401a9b9597951f59f4e406393e208268bd9b1b9"
   },
   "prediction": {
     "idle_power_fraction": 1.0,
@@ -37,7 +41,7 @@
   },
   "device": "Redmi K50 / Android 13 / model 22011211C / Magisk Delta",
   "limitations": [
-    "The latest APK is installed. A running match still uses the previous loaded script; applying the latest loader is awaiting the user's choice because it restarts the game.",
+    "The latest APK and loader are installed and applied on K50. Live toggle and count buttons were tested in the lobby without restarting the game; live shot-versus-preview error has not been quantified.",
     "Game-physics tests use extracted routines and an Egret adapter. Live shot-versus-preview error has not been quantified.",
     "Prediction ends at configured cushion counts or subsequent ball contact and may be truncated by time or CPU limits."
   ],
@@ -129,5 +133,12 @@
       },
       "device": "Redmi K50 / Android 13 / model 22011211C"
     }
+  },
+  "device_ui_verification": {
+    "bank_toggle": "on -> off -> on",
+    "bank_count": "1 -> 2 -> 1",
+    "game_process_unchanged_during_live_controls": true,
+    "final_bank_prediction_enabled": true,
+    "final_bank_count": 1
   }
 }
