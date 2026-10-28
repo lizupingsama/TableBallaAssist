@@ -24,15 +24,27 @@ public final class PatchEngineTest {
         check(Arrays.equals(parsed.base, original), "desktop base preserved byte for byte");
         check(parsed.settings.length == 220, "desktop settings recognized");
         check(parsed.settings.bankPrediction, "desktop bank toggle recognized");
+        check(parsed.settings.firstHitPocket, "desktop first-hit toggle recognized");
+        check(parsed.settings.snookerAllReds, "desktop snooker sweep recognized");
+        check(parsed.settings.eightBallAllButBlack, "desktop eight-ball sweep recognized");
         org.json.JSONObject legacy = new PatchEngine.Settings("fixed", 220, 6, true).json();
         legacy.remove("bankPrediction");
+        legacy.remove("firstHitPocket");
+        legacy.remove("snookerAllReds");
+        legacy.remove("eightBallAllButBlack");
         check(!PatchEngine.Settings.from(legacy).bankPrediction, "legacy patches default to banks disabled");
-        PatchEngine.Settings fixed = new PatchEngine.Settings("fixed", 300, 6, true, true);
+        check(!PatchEngine.Settings.from(legacy).firstHitPocket, "legacy patches default to first-hit disabled");
+        check(!PatchEngine.Settings.from(legacy).snookerAllReds, "legacy patches default to snooker sweep disabled");
+        check(!PatchEngine.Settings.from(legacy).eightBallAllButBlack, "legacy patches default to eight-ball sweep disabled");
+        PatchEngine.Settings fixed = new PatchEngine.Settings("fixed", 300, 6, true, true, true, true, true);
         byte[] mobile = PatchEngine.build(desktop, fixed, loader);
         PatchEngine.Snapshot split = PatchEngine.split(mobile);
         check(Arrays.equals(split.base, original), "Android restore round trip");
         check(split.settings.length == 300, "Android fixed length changed");
         check(split.settings.bankPrediction, "Android bank toggle preserved");
+        check(split.settings.firstHitPocket, "Android first-hit toggle preserved");
+        check(split.settings.snookerAllReds, "Android snooker sweep preserved");
+        check(split.settings.eightBallAllButBlack, "Android eight-ball sweep preserved");
         byte[] second = PatchEngine.build(mobile, fixed, loader);
         check(Arrays.equals(mobile, second), "Android apply is idempotent");
         PatchEngine.Settings multiplied = new PatchEngine.Settings("multiply", 220, 8, false);
@@ -40,6 +52,9 @@ public final class PatchEngineTest {
         check(PatchEngine.split(multiple).settings.factor == 8, "multiplier updated");
         check(!PatchEngine.split(multiple).settings.showSplit, "split option preserved");
         check(!PatchEngine.split(multiple).settings.bankPrediction, "bank toggle can be turned off");
+        check(!PatchEngine.split(multiple).settings.firstHitPocket, "first-hit toggle can be turned off");
+        check(!PatchEngine.split(multiple).settings.snookerAllReds, "snooker sweep can be turned off");
+        check(!PatchEngine.split(multiple).settings.eightBallAllButBlack, "eight-ball sweep can be turned off");
         boolean rejected = false;
         try { PatchEngine.split(("<!-- changed -->" + new String(mobile, StandardCharsets.UTF_8)).getBytes(StandardCharsets.UTF_8)); }
         catch (Exception expected) { rejected = true; }

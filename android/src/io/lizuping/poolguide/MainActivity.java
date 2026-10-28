@@ -42,6 +42,9 @@ public final class MainActivity extends Activity {
     private EditText factor;
     private CheckBox split;
     private Switch banks;
+    private Switch firstPocket;
+    private Switch snookerReds;
+    private Switch eightSweep;
     private LinearLayout lengthRow;
     private LinearLayout factorRow;
     private volatile boolean busy;
@@ -57,7 +60,7 @@ public final class MainActivity extends Activity {
         page.setPadding(dp(24), dp(22), dp(24), dp(30));
         scroll.addView(page, new ScrollView.LayoutParams(-1, -2));
 
-        TextView eyebrow = label("POOL GUIDE   /   1.1", 12, ACCENT);
+        TextView eyebrow = label("POOL GUIDE   /   1.4", 12, ACCENT);
         eyebrow.setLetterSpacing(.14f);
         page.addView(eyebrow);
         TextView title = label("辅助线加长", 30, TEXT);
@@ -111,7 +114,7 @@ public final class MainActivity extends Activity {
         settings.addView(split);
         banks = new Switch(this);
         banks.setId(R.id.bank_prediction);
-        banks.setText("库边反弹预测（最多 3 次）");
+        banks.setText("启动时开启反弹预测");
         banks.setTextSize(14);
         banks.setTextColor(TEXT);
         banks.setChecked(false);
@@ -125,14 +128,34 @@ public final class MainActivity extends Activity {
         banks.setOnCheckedChangeListener((button, checked) -> updateMode());
         controls.add(banks);
         settings.addView(banks);
-        add(settings, label("开启后按撞库次数绘制，遇后续碰球或袋口停止。青色为母球，黄色为目标球；目标球轨迹需启用分裂线。关闭后使用上面的直线长度设置。", 12, MUTED), 9, 0);
+        add(settings, label("游戏右下角可实时开关，并选择 1–6 次反弹。青色为母球，黄色为目标球；目标球轨迹需启用分裂线。未拉杆时按 100% 满力预览，拉杆后按实际力度与当前旋转试算。", 12, MUTED), 9, 0);
+        firstPocket = new Switch(this);
+        firstPocket.setId(R.id.first_hit_pocket);
+        firstPocket.setText("启动时开启首碰目标必进");
+        firstPocket.setTextSize(14);
+        firstPocket.setTextColor(TEXT);
+        firstPocket.setChecked(false);
+        firstPocket.setMinHeight(dp(48));
+        firstPocket.setSwitchPadding(dp(12));
+        firstPocket.setShowText(false);
+        firstPocket.setThumbTintList(new ColorStateList(new int[][]{{android.R.attr.state_checked}, {}},
+                new int[]{ACCENT, MUTED}));
+        firstPocket.setTrackTintList(new ColorStateList(new int[][]{{android.R.attr.state_checked}, {}},
+                new int[]{Color.rgb(44, 119, 108), Color.rgb(60, 79, 85)}));
+        controls.add(firstPocket);
+        add(settings, firstPocket, 14, 0);
+        snookerReds = pocketSwitch("启动时开启斯诺克全红入袋", R.id.snooker_all_reds);
+        add(settings, snookerReds, 4, 0);
+        eightSweep = pocketSwitch("启动时开启中八非黑八全入袋", R.id.eight_ball_all_but_black);
+        add(settings, eightSweep, 4, 0);
+        add(settings, label("应用后，在游戏内展开“入袋开关”可动态切换三项功能。开启从下一杆生效，关闭阻止后续触发；已入袋球不会还原。斯诺克碰红收全红，中八碰目标球收非黑八；模式专用开关优先，原有犯规规则继续生效。", 12, MUTED), 9, 0);
         add(page, settings, 0, 20);
         modes.setOnCheckedChangeListener((group, checked) -> updateMode());
 
         Button apply = button("应用设置并打开游戏", true, R.id.apply_settings);
         apply.setOnClickListener(view -> execute("apply"));
         add(page, apply, 0, 10);
-        Button restore = button("恢复原始辅助线", false, R.id.restore_settings);
+        Button restore = button("恢复游戏原始设置", false, R.id.restore_settings);
         restore.setOnClickListener(view -> execute("restore"));
         add(page, restore, 0, 10);
         Button open = button("只打开游戏", false, R.id.open_game);
@@ -146,6 +169,24 @@ public final class MainActivity extends Activity {
 
     private int dp(int value) {
         return Math.round(value * getResources().getDisplayMetrics().density);
+    }
+
+    private Switch pocketSwitch(String text, int id) {
+        Switch control = new Switch(this);
+        control.setId(id);
+        control.setText(text);
+        control.setTextSize(14);
+        control.setTextColor(TEXT);
+        control.setChecked(false);
+        control.setMinHeight(dp(48));
+        control.setSwitchPadding(dp(12));
+        control.setShowText(false);
+        control.setThumbTintList(new ColorStateList(new int[][]{{android.R.attr.state_checked}, {}},
+                new int[]{ACCENT, MUTED}));
+        control.setTrackTintList(new ColorStateList(new int[][]{{android.R.attr.state_checked}, {}},
+                new int[]{Color.rgb(44, 119, 108), Color.rgb(60, 79, 85)}));
+        controls.add(control);
+        return control;
     }
 
     private LinearLayout column() {
@@ -232,6 +273,9 @@ public final class MainActivity extends Activity {
         factor.setText(format(settings.factor));
         split.setChecked(settings.showSplit);
         banks.setChecked(settings.bankPrediction);
+        firstPocket.setChecked(settings.firstHitPocket);
+        snookerReds.setChecked(settings.snookerAllReds);
+        eightSweep.setChecked(settings.eightBallAllButBlack);
     }
 
     private String format(double value) {
@@ -244,7 +288,8 @@ public final class MainActivity extends Activity {
             setInputs(new PatchEngine.Settings(saved.getString("mode", "fixed"),
                     Double.parseDouble(saved.getString("length", "220")),
                     Double.parseDouble(saved.getString("factor", "6")), saved.getBoolean("split", true),
-                    saved.getBoolean("banks", false)));
+                    saved.getBoolean("banks", false), saved.getBoolean("firstPocket", false),
+                    saved.getBoolean("snookerReds", false), saved.getBoolean("eightSweep", false)));
         } catch (Exception ignored) {}
     }
 
@@ -255,7 +300,8 @@ public final class MainActivity extends Activity {
         PatchEngine.Settings settings;
         try {
             settings = new PatchEngine.Settings(modes.getCheckedRadioButtonId() == R.id.mode_fixed ? "fixed" : "multiply",
-                    Double.parseDouble(length.getText().toString()), Double.parseDouble(factor.getText().toString()), split.isChecked(), banks.isChecked());
+                    Double.parseDouble(length.getText().toString()), Double.parseDouble(factor.getText().toString()),
+                    split.isChecked(), banks.isChecked(), firstPocket.isChecked(), snookerReds.isChecked(), eightSweep.isChecked());
         } catch (Exception error) {
             state.setText("请输入 10–1500 的长度和 1–30 的倍数。");
             return;
@@ -269,7 +315,7 @@ public final class MainActivity extends Activity {
             try {
                 RootBackend.Result result = backend.execute(action, settings);
                 runOnUiThread(() -> {
-                    permission.setText(result.snapshot.installed() ? "Root 已授权 · 加长已启用" : "Root 已授权 · 原始线长");
+                    permission.setText(result.snapshot.installed() ? "Root 已授权 · 补丁已应用" : "Root 已授权 · 原始设置");
                     state.setText(result.message);
                     if (result.snapshot.settings != null) {
                         setInputs(result.snapshot.settings);
@@ -277,7 +323,10 @@ public final class MainActivity extends Activity {
                                 .putString("length", Double.toString(result.snapshot.settings.length))
                                 .putString("factor", Double.toString(result.snapshot.settings.factor))
                                 .putBoolean("split", result.snapshot.settings.showSplit)
-                                .putBoolean("banks", result.snapshot.settings.bankPrediction).apply();
+                                .putBoolean("banks", result.snapshot.settings.bankPrediction)
+                                .putBoolean("firstPocket", result.snapshot.settings.firstHitPocket)
+                                .putBoolean("snookerReds", result.snapshot.settings.snookerAllReds)
+                                .putBoolean("eightSweep", result.snapshot.settings.eightBallAllButBlack).apply();
                     }
                     if (!"status".equals(action)) {
                         Toast.makeText(this, result.message, Toast.LENGTH_LONG).show();

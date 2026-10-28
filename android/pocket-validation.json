@@ -1,0 +1,50 @@
+{
+  "date": "2026-10-28",
+  "source_version": "1.4.0",
+  "scope": "Three live pocket switches and their startup configuration",
+  "source_stable": true,
+  "switches": [
+    "firstHitPocket",
+    "snookerAllReds",
+    "eightBallAllButBlack"
+  ],
+  "defaults": {
+    "firstHitPocket": false,
+    "snookerAllReds": false,
+    "eightBallAllButBlack": false
+  },
+  "dynamic_behavior": {
+    "enable": "next shot",
+    "disable": "blocks pending triggers; does not restore pocketed balls",
+    "persistence": "live session only; startup state remains in the root tool config",
+    "batch_options_take_priority": true
+  },
+  "preview_api": "state.previewPocketCandidates(table, firstTarget)",
+  "preview_api_effects": "Returns a fresh array of eligible ball references from the supplied table; does not mutate balls, results or arrays.",
+  "checks": {
+    "targeted_javascript_tests_passed": 38,
+    "all_javascript_tests_passed": 67,
+    "python_tests_passed": 10,
+    "java_patch_checks": 27,
+    "cross_language_checks": 14,
+    "syntax_and_diff_checks": true
+  },
+  "deployment": {
+    "final_build_pending": true,
+    "installed_by_this_chat": false,
+    "applied_by_this_chat": false,
+    "coordinator": "Other chat maintaining bank_physics.js performs the final combined build, install and apply."
+  },
+  "limitations": [
+    "No live sweep gameplay or server-acceptance validation was performed.",
+    "Physics module integration of previewPocketCandidates is owned by the coordinating chat; the read-only API is ready."
+  ],
+  "source_sha256": {
+    "guide.js": "54c2ed41ad99c50b56efb1eef2dc117115428abceafe2d67afdef286eb7318b6",
+    "live_controls.js": "73fd007eae8f17e7eec96764f00ca1dd774549cddeaffed8c73af19562cb1c44",
+    "android/src/io/lizuping/poolguide/PatchEngine.java": "53280781d659dbd60ea9eafad5c21a7a23f590e4953553be97508f346b97fccf",
+    "android/src/io/lizuping/poolguide/MainActivity.java": "8bb36ca81368153f5025cef39f675efe91110033acfd1087d928dabaa4ae2bcc",
+    "tests/pocket-sweeps.test.cjs": "c57fb7d947818d59cad1b942cffac16f8d55e7a68e4cf2e646602993b3f595b6",
+    "tests/pocket-fixture.cjs": "696b97e7a8642c991a893c6d9ad26e57b0b8a40d87db40eed4e0960f7e560d6c"
+  }
+}

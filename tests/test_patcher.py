@@ -11,6 +11,30 @@ SOURCE = b'<html><body><script src="manifest.json"></script></body></html>'
 class PatchTests(unittest.TestCase):
     def test_legacy_settings_disable_banks_by_default(self):
         self.assertFalse(validate_settings({})["bankPrediction"])
+        self.assertFalse(validate_settings({})["firstHitPocket"])
+        self.assertFalse(validate_settings({})["snookerAllReds"])
+        self.assertFalse(validate_settings({})["eightBallAllButBlack"])
+
+    def test_sweep_switches_round_trip_independently_and_preserve_defaults(self):
+        for name in ("snookerAllReds", "eightBallAllButBlack"):
+            patched = build_patch(SOURCE, {name: True})
+            base, config = split_patch(patched)
+            self.assertEqual(base, SOURCE)
+            self.assertTrue(config["settings"][name])
+            self.assertFalse(config["settings"]["firstHitPocket"])
+            disabled = build_patch(patched, {})
+            self.assertFalse(split_patch(disabled)[1]["settings"][name])
+            self.assertEqual(disabled.count(START), 1)
+
+    def test_first_hit_pocket_toggle_survives_patch_and_can_be_disabled(self):
+        patched = build_patch(SOURCE, {"firstHitPocket": True, "bankPrediction": True})
+        base, config = split_patch(patched)
+        self.assertEqual(base, SOURCE)
+        self.assertTrue(config["settings"]["firstHitPocket"])
+        self.assertTrue(config["settings"]["bankPrediction"])
+        updated = build_patch(patched, {"firstHitPocket": False})
+        self.assertFalse(split_patch(updated)[1]["settings"]["firstHitPocket"])
+        self.assertEqual(updated.count(START), 1)
 
     def test_bank_toggle_survives_patch_round_trip_and_reapplication(self):
         patched = build_patch(SOURCE, {"bankPrediction": True})

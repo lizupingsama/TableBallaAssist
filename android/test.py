@@ -19,7 +19,7 @@ def main():
         directory = Path(folder)
         original = '\ufeff<html>\r\n<body>中文\r\n<script src="manifest.json"></script>\r\n</body></html>\r\n'.encode("utf-8")
         (directory / "original.html").write_bytes(original)
-        (directory / "desktop.html").write_bytes(desktop.build_patch(original, {"length": 220, "bankPrediction": True}))
+        (directory / "desktop.html").write_bytes(desktop.build_patch(original, {"length": 220, "bankPrediction": True, "firstHitPocket": True, "snookerAllReds": True, "eightBallAllButBlack": True}))
         classes = directory / "classes"
         classes.mkdir()
         subprocess.run([str(jdk / "bin/javac.exe"), "-encoding", "UTF-8", "--release", "8", "-cp", str(jars[-1]),
@@ -34,8 +34,11 @@ def main():
             assert base == original
             assert config["settings"]["mode"] == expected
             assert config["settings"]["bankPrediction"] == (name == "mobile.html")
+            assert config["settings"]["firstHitPocket"] == (name == "mobile.html")
+            assert config["settings"]["snookerAllReds"] == (name == "mobile.html")
+            assert config["settings"]["eightBallAllButBlack"] == (name == "mobile.html")
             assert desktop.split_patch(desktop.build_patch((directory / name).read_bytes(), {"length": 400}))[0] == original
-        print("Desktop / Android patch compatibility: 8 checks passed")
+        print("Desktop / Android patch compatibility: 14 checks passed")
 
 
 if __name__ == "__main__":

@@ -9,5 +9,8 @@
     <item name="line_factor" type="id" />
     <item name="show_split" type="id" />
     <item name="bank_prediction" type="id" />
+    <item name="first_hit_pocket" type="id" />
+    <item name="snooker_all_reds" type="id" />
+    <item name="eight_ball_all_but_black" type="id" />
     <item name="status_text" type="id" />
 </resources>

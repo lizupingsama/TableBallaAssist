@@ -212,6 +212,18 @@ public final class RootBackend {
                     }
                 }
             }
+            if (settings.firstHitPocket || settings.snookerAllReds || settings.eightBallAllButBlack) {
+                String[] pocketRequired = {"var Table=", "handleCollision", "shotPlayerLocalIndex", "BallPocketCollision",
+                        "BALL_ENTERED_POCKET", "BALL_POCKETED", "ballPocketed", "nSTATE_IN_BALL_RUNNER"};
+                for (String key : pocketRequired) {
+                    if (!source.contains(key)) {
+                        throw new Exception("游戏的碰撞入袋接口已改变，当前版本暂不支持首碰必进，未作修改。");
+                    }
+                }
+            }
+            if (settings.snookerAllReds && (!source.contains("BallPropertiesSnk") || !source.contains("BALL_CLASSIFICATION_REDBALL"))) {
+                throw new Exception("游戏的斯诺克红球接口已改变，未作修改。");
+            }
         }
         byte[] replacement = "apply".equals(action) ? PatchEngine.build(current, settings, loader()) : snapshot.base;
         String baseHash = PatchEngine.sha256(snapshot.base);
@@ -260,7 +272,7 @@ public final class RootBackend {
             result.snapshot = PatchEngine.split(replacement);
             result.entryHash = PatchEngine.sha256(replacement);
             result.backup = backup;
-            result.message = "apply".equals(action) ? "已应用加长设置，正在打开游戏。" : "已恢复原始辅助线，正在打开游戏。";
+            result.message = "apply".equals(action) ? "已应用补丁设置，正在打开游戏。" : "已恢复游戏原始设置，正在打开游戏。";
             launchGame();
             return result;
         } catch (Exception failure) {
