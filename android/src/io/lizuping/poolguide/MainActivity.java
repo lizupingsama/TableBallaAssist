@@ -60,7 +60,7 @@ public final class MainActivity extends Activity {
         page.setPadding(dp(24), dp(22), dp(24), dp(30));
         scroll.addView(page, new ScrollView.LayoutParams(-1, -2));
 
-        TextView eyebrow = label("POOL GUIDE   /   1.4", 12, ACCENT);
+        TextView eyebrow = label("POOL GUIDE   /   1.5", 12, ACCENT);
         eyebrow.setLetterSpacing(.14f);
         page.addView(eyebrow);
         TextView title = label("辅助线加长", 30, TEXT);
@@ -128,7 +128,7 @@ public final class MainActivity extends Activity {
         banks.setOnCheckedChangeListener((button, checked) -> updateMode());
         controls.add(banks);
         settings.addView(banks);
-        add(settings, label("游戏右下角可实时开关，并选择 1–6 次反弹。青色为母球，黄色为目标球；目标球轨迹需启用分裂线。未拉杆时按 100% 满力预览，拉杆后按实际力度与当前旋转试算。", 12, MUTED), 9, 0);
+        add(settings, label("游戏右下角可实时开关，并选择 1–6 次反弹。青色为母球，黄色为目标球；目标球轨迹需启用分裂线。未拉杆时按 100% 满力预览，拉杆后按实际力度与当前旋转试算。点“隐藏”收起面板，再点右侧“辅助”展开。", 12, MUTED), 9, 0);
         firstPocket = new Switch(this);
         firstPocket.setId(R.id.first_hit_pocket);
         firstPocket.setText("启动时开启首碰目标必进");

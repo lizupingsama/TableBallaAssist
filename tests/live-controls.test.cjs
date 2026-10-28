@@ -90,7 +90,7 @@ test('remount and restore release the old DOM panel and polling timer', () => {
     const f = setup();
     f.s.__poolGuideControls.mount(f.s.__poolGuideExtender);
     assert.equal(f.timers.size, 1);
-    assert.equal(f.s.document.body.children.length, 1);
+    assert.equal(f.s.document.body.children.length, 2);
     f.s.__poolGuideRequest = {action: 'restore'};
     vm.runInContext(hook, f.s);
     assert.equal(f.timers.size, 0);

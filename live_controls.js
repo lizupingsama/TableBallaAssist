@@ -2,13 +2,17 @@
 (function (root) {
     'use strict';
     var ID = 'poolguide-live-controls';
+    var SHOW_ID = 'poolguide-controls-show';
     var COUNT_KEY = 'poolguide-bank-count-v1';
+    var HIDDEN_KEY = 'poolguide-controls-hidden-v1';
     function mount(state) {
         var doc = root.document;
         if (!state || !doc || typeof doc.getElementById !== 'function' || !doc.body) { return; }
         if (state.controls) { state.controls.dispose(); }
         var existing = doc.getElementById(ID);
         if (existing && existing.parentNode) { existing.parentNode.removeChild(existing); }
+        var oldShow = doc.getElementById(SHOW_ID);
+        if (oldShow && oldShow.parentNode) { oldShow.parentNode.removeChild(oldShow); }
         var panel = doc.createElement('div');
         panel.id = ID;
         panel.style.cssText = 'position:fixed;right:8px;bottom:30px;z-index:2147483647;pointer-events:auto;color:#e7f6f3;background:rgba(11,27,34,.92);border:1px solid #68e8c9;border-radius:8px;padding:6px;font:13px sans-serif;max-width:calc(100vw - 24px);box-sizing:border-box;';
@@ -28,6 +32,14 @@
         }
         var minus = stepButton('−', '减少反弹次数');
         var plus = stepButton('＋', '增加反弹次数');
+        var hide = stepButton('隐藏', '隐藏辅助面板，功能继续生效');
+        hide.id = 'poolguide-controls-hide';
+        hide.setAttribute('aria-controls', ID);
+        var show = stepButton('辅助', '展开辅助面板');
+        show.id = SHOW_ID;
+        show.setAttribute('aria-controls', ID);
+        show.style.cssText = 'display:none;position:fixed;right:0;bottom:30px;z-index:2147483647;pointer-events:auto;color:#d5fff4;background:rgba(11,27,34,.65);border:1px solid #68e8c9;border-right:0;border-radius:18px 0 0 18px;font:12px sans-serif;min-width:36px;min-height:36px;padding:7px 5px;';
+        var hidden = false;
         var count = doc.createElement('span');
         count.setAttribute('aria-label', '预测反弹次数');
         count.style.cssText = 'min-width:36px;text-align:center;';
@@ -37,6 +49,7 @@
         row.appendChild(minus);
         row.appendChild(count);
         row.appendChild(plus);
+        row.appendChild(hide);
         panel.appendChild(row);
         panel.appendChild(hint);
         var pocketButtons = [];
@@ -91,6 +104,23 @@
             panel.appendChild(pocketPanel);
         }
         doc.body.appendChild(panel);
+        doc.body.appendChild(show);
+        function setHidden(value) {
+            hidden = value;
+            panel.style.display = hidden ? 'none' : '';
+            show.style.display = hidden ? 'block' : 'none';
+            show.setAttribute('aria-expanded', String(!hidden));
+            try { root.localStorage.setItem(HIDDEN_KEY, String(hidden)); } catch (ignored) {}
+            refresh();
+        }
+        hide.addEventListener('click', function (event) {
+            event.stopPropagation();
+            setHidden(true);
+        });
+        show.addEventListener('click', function (event) {
+            event.stopPropagation();
+            setHidden(false);
+        });
         function refresh() {
             toggle.textContent = '反弹预测：' + (state.settings.bankPrediction ? '开' : '关');
             toggle.setAttribute('aria-pressed', String(state.settings.bankPrediction));
@@ -120,6 +150,7 @@
             }
             var badge = doc.getElementById('poolguide-status');
             if (badge) {
+                badge.style.display = hidden ? 'none' : '';
                 badge.textContent = state.settings.bankPrediction ? '反弹预测 · 最多' + state.settings.bankCount + '次' :
                     '辅助线 ' + (state.settings.mode === 'fixed' ? state.settings.length : state.settings.factor + 'x');
                 if (state.settings.firstHitPocket && state.pocketHooks) { badge.textContent += ' · 首碰必进'; }
@@ -147,6 +178,7 @@
         var stop = function (event) { event.stopPropagation(); };
         for (var e = 0; e < 4; e++) {
             panel.addEventListener(['touchstart', 'touchmove', 'touchend', 'mousedown'][e], stop);
+            show.addEventListener(['touchstart', 'touchmove', 'touchend', 'mousedown'][e], stop);
         }
         try {
             var saved = Number(root.localStorage.getItem(COUNT_KEY));
@@ -154,6 +186,7 @@
                 state.configureBanks(state.settings.bankPrediction, saved);
             }
         } catch (ignored) {}
+        try { setHidden(root.localStorage.getItem(HIDDEN_KEY) === 'true'); } catch (ignored) {}
         var timer = root.setInterval(function () {
             if (root[ '__poolGuideExtender' ] !== state) { dispose(); return; }
             if (state.settings.bankPrediction && !doc.hidden) {
@@ -170,6 +203,9 @@
         function dispose() {
             root.clearInterval(timer);
             if (panel.parentNode) { panel.parentNode.removeChild(panel); }
+            if (show.parentNode) { show.parentNode.removeChild(show); }
+            var badge = doc.getElementById('poolguide-status');
+            if (badge) { badge.style.display = ''; }
         }
         state.controls = {refresh: refresh, dispose: dispose};
         refresh();

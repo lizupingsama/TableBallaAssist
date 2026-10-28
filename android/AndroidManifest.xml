@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="io.lizuping.poolguide" android:versionCode="5" android:versionName="1.4.0">
+    package="io.lizuping.poolguide" android:versionCode="6" android:versionName="1.5.0">
     <uses-sdk android:minSdkVersion="26" android:targetSdkVersion="33" />
     <queries><package android:name="com.krmtqds.aligames" /></queries>
     <application android:label="台球辅助线" android:icon="@drawable/ic_launcher"

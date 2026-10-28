@@ -1,31 +1,31 @@
 {
   "date": "2026-10-28",
-  "version": "1.4.0",
-  "apk": "PoolGuide-1.4.0.apk",
+  "version": "1.5.0",
+  "apk": "PoolGuide-1.5.0.apk",
   "package": "io.lizuping.poolguide",
   "bytes": 45595,
-  "apk_sha256": "74702b7e38edd23e4f2f0f3441cd2b34b529ab9108e3b17b3a053b9e123d2ba8",
+  "apk_sha256": "acae65f9bf0651d252db5a34e70513facac930112fb1bd7d098e3d511a56dd9a",
   "certificate_sha256": "827d67839b54702b32333f94fd73b5b0e7ee02e62bf4ed74f801cf72e864668f",
   "checks": {
-    "javascript_tests_passed": 68,
-    "python_tests_passed": 10,
-    "java_patch_checks": 27,
-    "cross_language_checks": 14,
-    "total_tests_and_checks": 119,
-    "aim_angles_checked": 120,
+    "ui_regression_tests_passed": 22,
     "apk_signature_v2": true,
     "apk_signature_v3": true,
     "zip_alignment": true,
     "packaged_loader_matches_source": true,
-    "installed_version_code": 5,
-    "installed_version_name": "1.4.0",
-    "live_toggle_without_restart_verified_on_prior_build": true,
-    "final_patch_apply_pending": false,
-    "live_trajectory_accuracy_quantified": false,
-    "latest_loader_applied_and_hash_verified": true,
-    "live_toggle_without_restart_verified": true,
-    "live_cushion_count_buttons_verified": true,
-    "device_entry_sha256": "9a4f31e48032ae731f5917030401a9b9597951f59f4e406393e208268bd9b1b9"
+    "installed_version_code": 6,
+    "installed_version_name": "1.5.0",
+    "latest_loader_applied": true,
+    "hide_restore_hide_verified_on_device": true,
+    "game_process_unchanged_during_hide_restore": true,
+    "bank_settings_preserved": true,
+    "status_badge_hidden_with_panel": true
+  },
+  "device": "Redmi K50 / Android 13 / model 22011211C / Magisk Delta",
+  "ui": {
+    "hidden_entry": "辅助",
+    "collapse_state_persisted": true,
+    "final_state": "hidden",
+    "features_continue_when_hidden": true
   },
   "prediction": {
     "idle_power_fraction": 1.0,
@@ -39,106 +39,151 @@
     "maximum_simulation_seconds": 20,
     "cpu_budget_ms": 35
   },
-  "device": "Redmi K50 / Android 13 / model 22011211C / Magisk Delta",
   "limitations": [
-    "The latest APK and loader are installed and applied on K50. Live toggle and count buttons were tested in the lobby without restarting the game; live shot-versus-preview error has not been quantified.",
-    "Game-physics tests use extracted routines and an Egret adapter. Live shot-versus-preview error has not been quantified.",
-    "Prediction ends at configured cushion counts or subsequent ball contact and may be truncated by time or CPU limits."
+    "Hide/show was verified in the game lobby. This UI change does not establish shot-versus-preview accuracy."
   ],
-  "pocket_test_record": "pocket-validation.json",
   "previous_release_validation": {
     "date": "2026-10-28",
-    "version": "1.2.0",
-    "apk": "PoolGuide-1.2.0.apk",
+    "version": "1.4.0",
+    "apk": "PoolGuide-1.4.0.apk",
     "package": "io.lizuping.poolguide",
-    "bytes": 37403,
-    "apk_sha256": "e1ec2ec78b446d08269795a3ab732022a5599678de0e67f273ff7c98f7ac0b37",
+    "bytes": 45595,
+    "apk_sha256": "74702b7e38edd23e4f2f0f3441cd2b34b529ab9108e3b17b3a053b9e123d2ba8",
     "certificate_sha256": "827d67839b54702b32333f94fd73b5b0e7ee02e62bf4ed74f801cf72e864668f",
     "checks": {
-      "javascript_tests_passed": 38,
-      "first_hit_tests_passed": 16,
-      "python_tests_passed": 9,
-      "java_patch_checks": 19,
-      "cross_language_checks": 10,
+      "javascript_tests_passed": 68,
+      "python_tests_passed": 10,
+      "java_patch_checks": 27,
+      "cross_language_checks": 14,
+      "total_tests_and_checks": 119,
+      "aim_angles_checked": 120,
       "apk_signature_v2": true,
       "apk_signature_v3": true,
       "zip_alignment": true,
-      "same_signing_certificate_as_1_1_0": true,
-      "packaged_first_hit_loader_present": true,
-      "installed_version_code": 3,
-      "installed_version_name": "1.2.0",
-      "foreground_game_preserved_during_install": true,
-      "new_apk_launched": false,
-      "native_first_hit_switch_inspected": false,
-      "first_hit_feature_applied_on_device": false,
-      "live_first_hit_pocket_verified": false,
-      "online_server_acceptance_verified": false
+      "packaged_loader_matches_source": true,
+      "installed_version_code": 5,
+      "installed_version_name": "1.4.0",
+      "live_toggle_without_restart_verified_on_prior_build": true,
+      "final_patch_apply_pending": false,
+      "live_trajectory_accuracy_quantified": false,
+      "latest_loader_applied_and_hash_verified": true,
+      "live_toggle_without_restart_verified": true,
+      "live_cushion_count_buttons_verified": true,
+      "device_entry_sha256": "9a4f31e48032ae731f5917030401a9b9597951f59f4e406393e208268bd9b1b9"
     },
-    "defaults": {
-      "bankPrediction": false,
-      "firstHitPocket": false,
-      "max_cushion_reflections_per_path": 3
+    "prediction": {
+      "idle_power_fraction": 1.0,
+      "pulled_power": "actual current cue power",
+      "english": "current englishX/englishY",
+      "model": "private TableTest with game shot, friction and collision functions",
+      "bank_count_min": 1,
+      "bank_count_max": 6,
+      "bank_count_default": 3,
+      "time_step_seconds": 0.01,
+      "maximum_simulation_seconds": 20,
+      "cpu_budget_ms": 35
     },
     "device": "Redmi K50 / Android 13 / model 22011211C / Magisk Delta",
-    "behavior": {
-      "own_shot_only": true,
-      "per_shot_first_cue_contact_only": true,
-      "pocket_choice": "nearest",
-      "instant_entry": true,
-      "existing_foul_and_black_ball_rules_retained": true,
-      "push_ball_mode_supported": false
-    },
     "limitations": [
-      "The device was in an active game; only the helper APK was upgraded. No game restart, setting application, or gameplay input was performed.",
-      "Physics/result/event tests use extracted Table, LogicalBall and ShotResults definitions with an Egret adapter and a stubbed ball runner; they do not prove live UI behavior or server acceptance."
+      "The latest APK and loader are installed and applied on K50. Live toggle and count buttons were tested in the lobby without restarting the game; live shot-versus-preview error has not been quantified.",
+      "Game-physics tests use extracted routines and an Egret adapter. Live shot-versus-preview error has not been quantified.",
+      "Prediction ends at configured cushion counts or subsequent ball contact and may be truncated by time or CPU limits."
     ],
+    "pocket_test_record": "pocket-validation.json",
     "previous_release_validation": {
       "date": "2026-10-28",
-      "version": "1.1.0",
-      "apk": "PoolGuide-1.1.0.apk",
+      "version": "1.2.0",
+      "apk": "PoolGuide-1.2.0.apk",
       "package": "io.lizuping.poolguide",
-      "bytes": 33307,
-      "apk_sha256": "18f034fed619cb33b2e4037e3a04c13383e46e2866c4f17fbbcaed88d650b82b",
+      "bytes": 37403,
+      "apk_sha256": "e1ec2ec78b446d08269795a3ab732022a5599678de0e67f273ff7c98f7ac0b37",
       "certificate_sha256": "827d67839b54702b32333f94fd73b5b0e7ee02e62bf4ed74f801cf72e864668f",
       "checks": {
-        "javascript_tests_passed": 22,
-        "python_tests_passed": 8,
-        "java_patch_checks": 15,
-        "cross_language_checks": 8,
-        "aim_angles_checked": 120,
+        "javascript_tests_passed": 38,
+        "first_hit_tests_passed": 16,
+        "python_tests_passed": 9,
+        "java_patch_checks": 19,
+        "cross_language_checks": 10,
         "apk_signature_v2": true,
         "apk_signature_v3": true,
         "zip_alignment": true,
-        "same_signing_certificate_as_1_0_0": true,
-        "packaged_bank_loader_present": true,
-        "installed_and_launched": true,
-        "live_table_trajectory_verified": false,
-        "native_bank_switch_found": true,
-        "bank_loader_badge_observed_in_game_lobby": true
+        "same_signing_certificate_as_1_1_0": true,
+        "packaged_first_hit_loader_present": true,
+        "installed_version_code": 3,
+        "installed_version_name": "1.2.0",
+        "foreground_game_preserved_during_install": true,
+        "new_apk_launched": false,
+        "native_first_hit_switch_inspected": false,
+        "first_hit_feature_applied_on_device": false,
+        "live_first_hit_pocket_verified": false,
+        "online_server_acceptance_verified": false
       },
       "defaults": {
         "bankPrediction": false,
+        "firstHitPocket": false,
         "max_cushion_reflections_per_path": 3
       },
-      "limitations": [
-        "Installed and native switch inspected on device; bank badge observed in game lobby. Actual table trajectories have not been verified.",
-        "Direction preview starts without player-selected spin and does not model shot power, cloth slowdown or final resting position.",
-        "Paths stop at subsequent balls, pocket capture circles or pocket-jaw point collisions."
-      ],
-      "previous_device_validation": {
-        "version": "1.0.0",
-        "date": "2026-10-28",
-        "device": "Redmi K50 / Android 13 / Magisk Delta",
-        "reference": "README.md"
+      "device": "Redmi K50 / Android 13 / model 22011211C / Magisk Delta",
+      "behavior": {
+        "own_shot_only": true,
+        "per_shot_first_cue_contact_only": true,
+        "pocket_choice": "nearest",
+        "instant_entry": true,
+        "existing_foul_and_black_ball_rules_retained": true,
+        "push_ball_mode_supported": false
       },
-      "device": "Redmi K50 / Android 13 / model 22011211C"
+      "limitations": [
+        "The device was in an active game; only the helper APK was upgraded. No game restart, setting application, or gameplay input was performed.",
+        "Physics/result/event tests use extracted Table, LogicalBall and ShotResults definitions with an Egret adapter and a stubbed ball runner; they do not prove live UI behavior or server acceptance."
+      ],
+      "previous_release_validation": {
+        "date": "2026-10-28",
+        "version": "1.1.0",
+        "apk": "PoolGuide-1.1.0.apk",
+        "package": "io.lizuping.poolguide",
+        "bytes": 33307,
+        "apk_sha256": "18f034fed619cb33b2e4037e3a04c13383e46e2866c4f17fbbcaed88d650b82b",
+        "certificate_sha256": "827d67839b54702b32333f94fd73b5b0e7ee02e62bf4ed74f801cf72e864668f",
+        "checks": {
+          "javascript_tests_passed": 22,
+          "python_tests_passed": 8,
+          "java_patch_checks": 15,
+          "cross_language_checks": 8,
+          "aim_angles_checked": 120,
+          "apk_signature_v2": true,
+          "apk_signature_v3": true,
+          "zip_alignment": true,
+          "same_signing_certificate_as_1_0_0": true,
+          "packaged_bank_loader_present": true,
+          "installed_and_launched": true,
+          "live_table_trajectory_verified": false,
+          "native_bank_switch_found": true,
+          "bank_loader_badge_observed_in_game_lobby": true
+        },
+        "defaults": {
+          "bankPrediction": false,
+          "max_cushion_reflections_per_path": 3
+        },
+        "limitations": [
+          "Installed and native switch inspected on device; bank badge observed in game lobby. Actual table trajectories have not been verified.",
+          "Direction preview starts without player-selected spin and does not model shot power, cloth slowdown or final resting position.",
+          "Paths stop at subsequent balls, pocket capture circles or pocket-jaw point collisions."
+        ],
+        "previous_device_validation": {
+          "version": "1.0.0",
+          "date": "2026-10-28",
+          "device": "Redmi K50 / Android 13 / Magisk Delta",
+          "reference": "README.md"
+        },
+        "device": "Redmi K50 / Android 13 / model 22011211C"
+      }
+    },
+    "device_ui_verification": {
+      "bank_toggle": "on -> off -> on",
+      "bank_count": "1 -> 2 -> 1",
+      "game_process_unchanged_during_live_controls": true,
+      "final_bank_prediction_enabled": true,
+      "final_bank_count": 1
     }
-  },
-  "device_ui_verification": {
-    "bank_toggle": "on -> off -> on",
-    "bank_count": "1 -> 2 -> 1",
-    "game_process_unchanged_during_live_controls": true,
-    "final_bank_prediction_enabled": true,
-    "final_bank_count": 1
   }
 }

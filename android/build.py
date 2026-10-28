@@ -95,7 +95,7 @@ def main():
         run([keytool, "-genkeypair", "-keystore", key, "-storetype", "PKCS12", "-storepass:file", password_file,
              "-alias", "poolguide", "-keyalg", "RSA", "-keysize", "2048", "-validity", "10000",
              "-dname", "CN=Pool Guide Local Build,O=Local Development,C=CN"])
-    output = work / "PoolGuide-1.4.0.apk"
+    output = work / "PoolGuide-1.5.0.apk"
     print("Sign and verify APK", flush=True)
     signer = [java, "-jar", tools / "lib/apksigner.jar"]
     key_password = work / "keypass.txt"
