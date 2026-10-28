@@ -1,0 +1,21 @@
+{
+  "date": "2026-10-28",
+  "device": "Redmi K50 / Android 13",
+  "package": "com.krmtqds.aligames",
+  "checks": {
+    "javascript_tests_passed": 9,
+    "python_tests_passed": 6,
+    "gui_initialized": true,
+    "powershell_5_1_launcher": true,
+    "device_patch_write_verified": true,
+    "loaded_badge_observed_on_device": true,
+    "device_restore_verified_byte_for_byte": true,
+    "patch_retained_after_restart": true,
+    "live_table_trajectory_verified": false
+  },
+  "original_entry_sha256": "56cfb57cdd3691e89c4d107be2301c50d015e463f4c059dec8aebbe5e4948619",
+  "restored_entry_sha256": "56cfb57cdd3691e89c4d107be2301c50d015e463f4c059dec8aebbe5e4948619",
+  "final_entry_sha256": "254fa7d2c45b3c675d7790393f0878b78b8257fcba507501a9c0319a6682be36",
+  "final_settings": {"mode": "fixed", "length": 220, "factor": 6, "showSplit": true},
+  "limitations": "Device remained at game-server login during observation; actual table appearance has not been verified. Lines are straight extrapolations and do not predict subsequent collisions."
+}

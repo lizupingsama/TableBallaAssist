@@ -1,0 +1,9 @@
+.venv/
+.cache/
+.backups/
+__pycache__/
+*.log
+node_modules/
+
+# Left over from the retired Frida experiment; unused by the root edition.
+/package-lock.json

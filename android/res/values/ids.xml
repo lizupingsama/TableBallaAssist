@@ -1,0 +1,12 @@
+<resources>
+    <item name="read_status" type="id" />
+    <item name="apply_settings" type="id" />
+    <item name="restore_settings" type="id" />
+    <item name="open_game" type="id" />
+    <item name="mode_fixed" type="id" />
+    <item name="mode_multiply" type="id" />
+    <item name="line_length" type="id" />
+    <item name="line_factor" type="id" />
+    <item name="show_split" type="id" />
+    <item name="status_text" type="id" />
+</resources>
