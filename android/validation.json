@@ -18,8 +18,14 @@
     "apk_signature_v3": true,
     "zip_alignment": true,
     "packaged_loader_matches_source": true,
-    "installed_on_device": false,
-    "latest_loader_applied": false
+    "installed_on_device": true,
+    "latest_loader_applied": true,
+    "installed_version_code": 7,
+    "installed_version_name": "1.5.1",
+    "device_entry_sha256": "83481a23163a6c4b7578a52c76928595664130cde5eeabf8017ae74b4eb929f7",
+    "patch_metadata_verified": true,
+    "first_hit_enabled_after_apply": true,
+    "hidden_control_entry_observed": true
   },
   "fix": "When a mode sweep has no eligible balls remaining, an armed first cue contact may use firstHitPocket; live-off, shot ownership and per-shot limits remain enforced.",
   "prediction": {
@@ -35,7 +41,7 @@
     "cpu_budget_ms": 35
   },
   "limitations": [
-    "ADB went offline after packaging; device installation/application is pending."
+    "On 2026-10-29, the APK was installed and the loader applied on K50. Device entry hash and new fallback code were verified. Actual online shot results and server acceptance were not tested."
   ],
   "previous_release_validation": {
     "date": "2026-10-28",
@@ -225,5 +231,6 @@
         "final_bank_count": 1
       }
     }
-  }
+  },
+  "device_validation_date": "2026-10-29"
 }
