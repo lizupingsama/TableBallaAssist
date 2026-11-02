@@ -181,6 +181,20 @@
                 type === 'snookerpractice' && typeof root.RulesSnkLianXi === 'function' &&
                 view.rule.constructor === root.RulesSnkLianXi);
         }
+        function visualOwned(view, guide) {
+            if (!view || viewFor(guide) !== view || !view.rule ||
+                view.rule.isTuiQiu || (view.poolCanvas.rules && view.poolCanvas.rules.isTuiQiu)) { return false; }
+            if (practiceAllowed(view, guide)) { return true; }
+            // The normal game reuses visualCue for whoever is taking the turn.
+            // changeTurn writes _curChairId before setCueData, whereas the rule's
+            // turn owner is updated afterwards. Never infer ownership from the
+            // drawing object, cue ID, or the permissive isMainPlayerOperation().
+            if (view._isAddGame === false || !view._chairUsers) { return false; }
+            var chair = Number(view._curChairId), current = account();
+            if (!integer(chair) || chair <= 0 || !/^[1-9][0-9]*$/.test(current)) { return false; }
+            var player = view._chairUsers[chair];
+            return !!(player && player.id !== undefined && player.id !== null && String(player.id) === current);
+        }
         function canRestoreMath(record) {
             var active = guides();
             for (var i = 0; i < active.length; i++) {
@@ -204,16 +218,19 @@
             }
             record.attributes = null;
         }
-        function restoreRecord(record) {
+        function restoreVisual(record) {
             restoreAttributes(record);
-            if (record.cue.showCue === record.showWrapper) { record.cue.showCue = record.showOriginal; }
-            if (record.view.setShootBallData === record.setWrapper) { record.view.setShootBallData = record.setOriginal; }
-            if (record.view.dispose === record.disposeWrapper) { record.view.dispose = record.disposeOriginal; }
             if (record.changed && record.originalResource) {
                 try { record.showOriginal.call(record.cue, record.originalId, record.originalResource, record.originalVariant); }
                 catch (ignored) {}
             }
             record.changed = false;
+        }
+        function restoreRecord(record) {
+            restoreVisual(record);
+            if (record.cue.showCue === record.showWrapper) { record.cue.showCue = record.showOriginal; }
+            if (record.view.setShootBallData === record.setWrapper) { record.view.setShootBallData = record.setOriginal; }
+            if (record.view.dispose === record.disposeWrapper) { record.view.dispose = record.disposeOriginal; }
         }
         function restoreAll() {
             var pending = records.slice(); records = [];
@@ -226,6 +243,7 @@
             return null;
         }
         function show(record) {
+            if (!visualOwned(record.view, record.guide)) { return; }
             var resource = variant();
             if (!resource || !armedView || record.view !== armedView) { return; }
             try {
@@ -277,7 +295,12 @@
                 record.originalId = id; record.originalResource = resource; record.originalVariant = extra;
                 record.failed = false;
                 var result = record.showOriginal.apply(this, arguments);
-                if (!busy && selected && armedView === view && viewFor(guide) === view) { show(record); }
+                // The native call just painted the latest player's real cue.
+                // Clear the previous player's override before deciding whether
+                // this new appearance is eligible for our local replacement.
+                record.changed = false;
+                if (!visualOwned(view, guide)) { restoreAttributes(record); }
+                else if (!busy && selected && armedView === view) { show(record); }
                 return result;
             };
             cue.showCue = record.showWrapper;
@@ -359,6 +382,7 @@
                         if (viewFor(guide) !== armedView) { continue; }
                         var record = watch(armedView, guide.visualCue, guide);
                         if (!record) { error = '当前球杆资源尚未就绪。'; continue; }
+                        if (record.changed && !visualOwned(armedView, guide)) { restoreVisual(record); }
                         if (!record.changed && !record.failed) { show(record); }
                         applyAttributes(record, guide);
                     }
@@ -366,6 +390,8 @@
                     if (result.visualCount) {
                         message = '外观仅本机可见' + (result.practiceActive ? ' · 满级属性已自动应用' :
                             ' · 当前场景保持原击球属性');
+                    } else if (records.length && !visualOwned(records[0].view, records[0].guide)) {
+                        message = '等待本人回合；对手球杆保持原样。';
                     }
                 }
                 if (ui) {

@@ -22,7 +22,7 @@ APKTOOL_URL = "https://github.com/iBotPeaches/Apktool/releases/download/v2.12.1/
 CLIENT = "smali_classes2/org/apache/cordova/engine/SystemWebViewClient.smali"
 HOOK = "Lio/lizuping/poolguide/embedded/Injector;->onPageFinished(Landroid/webkit/WebView;Ljava/lang/String;)V"
 ASSET = "assets/poolguide/loader.js"
-BUILD = "pg4"
+BUILD = "pg5"
 BASE_APK = ROOT / ".work" / ("PoolGame-NoRoot-3.2.1-" + BUILD + "-base.apk")
 COEXIST_APK = ROOT.parent / ("PoolGame-NoRoot-Coexist-3.2.1-" + BUILD + ".apk")
 

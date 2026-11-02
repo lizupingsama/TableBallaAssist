@@ -1,12 +1,12 @@
 {
   "date": "2026-11-02",
   "branch": "noroot",
-  "release_tag": "noroot-3.2.1-pg4",
-  "apk": "PoolGame-NoRoot-Coexist-3.2.1-pg4.apk",
-  "apk_sha256": "e70d2cae62a9bd76b50b69dc8e9c7ba23442394ec2ce88fb117153e1d983e5e1",
+  "release_tag": "noroot-3.2.1-pg5",
+  "apk": "PoolGame-NoRoot-Coexist-3.2.1-pg5.apk",
+  "apk_sha256": "fa5278e13169b081140e73a491d6b73143fa1de2d828e3217f311b4d974a68c8",
   "apk_bytes": 178419595,
   "module": "noroot-game/local_cues.js",
-  "module_sha256": "86708b531c3be721046a0d164d3a3f7310dd32135febacb513d05e1e86f8b9e8",
+  "module_sha256": "e0cdbaeddd7512ee05cc6ebfc0d6bd91afe11cd2a32cdb6372e20c6163f2c91b",
   "game_source_sha256": "548d726727ab070df4b447a837a88e606d8b61d43a41692fec22682c73cd833a",
   "practice_classes": [
     "PoolLianXiView",
@@ -37,10 +37,15 @@
     "signature_and_zip_alignment": "passed",
     "assembled_injection_and_channel_identity": "passed",
     "local_cue_and_max_level_node_tests": {
-      "passed": 36,
+      "passed": 46,
       "skipped": 0,
       "actual_athena_config_verified": true,
-      "real_game_class_definitions_evaluated": 5
+      "real_game_class_definitions_evaluated": 5,
+      "real_shared_cue_turn_methods_verified": true
+    },
+    "shared_cue_regression": {
+      "fixed_version_passed": true,
+      "original_pg4_failures_reproduced": 8
     }
   },
   "guard_coverage": [
@@ -55,7 +60,13 @@
     "athena_pinned_and_particle_only_resources_supported",
     "legacy_options_cannot_disable_default_attributes",
     "same_cue_visual_fallback_only",
-    "level_star_quality_terminal_ranks_with_duplicate_conflict_checks"
+    "level_star_quality_terminal_ranks_with_duplicate_conflict_checks",
+    "shared_instance_self_opponent_self_turns",
+    "opponent_apply_reset_equipment_updates",
+    "same_cue_id_requires_player_identity",
+    "unknown_owner_fails_closed",
+    "native_turn_update_order",
+    "spectator_replay_and_push_out_preserve_native_visuals"
   ],
   "feature_sends_equipment_requests": false,
   "modifies_server_owned_bag": false,
@@ -67,7 +78,7 @@
     "Only configured level/star/quality endpoints are simulated locally; server bonuses, legacy talents and account inventory are unchanged.",
     "Two obsolete cues (90007/90008) have no valid drawable resource in the inspected configuration and are not marked maxed."
   ],
-  "build": "pg4",
+  "build": "pg5",
   "level_module": "noroot-game/cue_levels.js",
   "level_module_sha256": "d9d8287f299cd4c3a3427dccbfc6094fca45e612ef745c4b8c80e6803e2bb334",
   "default_practice_attributes": true,
@@ -166,5 +177,12 @@
     ]
   },
   "time_rule_changed": false,
-  "server_or_legacy_talent_bonuses_applied": false
+  "server_or_legacy_talent_bonuses_applied": false,
+  "opponent_visual_fix": {
+    "root_cause": "The normal game reuses one visualCue for both players.",
+    "ownership_check": "_chairUsers[_curChairId].id equals the known MainUser id; unknown identity is rejected.",
+    "push_out_visual_override": false,
+    "active_table_selection_survives_opponent_turn": true,
+    "latest_native_cue_snapshot_preserved": true
+  }
 }

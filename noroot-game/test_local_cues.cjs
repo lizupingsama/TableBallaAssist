@@ -7,6 +7,7 @@ const vm = require('node:vm');
 
 const moduleSource = () => fs.readFileSync(path.join(__dirname, 'local_cues.js'), 'utf8');
 const gameMethods = fs.readFileSync(path.join(__dirname, 'qa/local-cues-game.fixture.js'), 'utf8');
+const sharedCueSnapshot = fs.readFileSync(path.join(__dirname, 'qa/shared-cue-turn.fixture.js'), 'utf8');
 const actualSourcePath = process.env.POOL_GAME_SOURCE || path.resolve(__dirname, '../../guide-extender/.cache/device-original-main.js');
 const actualSource = fs.existsSync(actualSourcePath) ? fs.readFileSync(actualSourcePath, 'utf8') : null;
 function actualClass(name) {
@@ -15,6 +16,24 @@ function actualClass(name) {
     assert.ok(start >= 0 && end > start, `${name} class not found in inspected script`);
     return actualSource.slice(start, end) + `__reflect(${name}.prototype,"${name}");`;
 }
+function actualMethod(className, methodName) {
+    const start = actualSource.indexOf(`var ${className}=function`);
+    const end = actualSource.indexOf(`__reflect(${className}.prototype`, start);
+    const classSource = actualSource.slice(start, end);
+    const prefix = `t.prototype.${methodName}=`;
+    const methodStart = classSource.indexOf(prefix) + prefix.length;
+    assert.ok(methodStart >= prefix.length, `${className}.${methodName} not found`);
+    const bodyStart = classSource.indexOf('{', methodStart); let depth = 1, methodEnd = bodyStart + 1;
+    for (; depth && methodEnd < classSource.length; methodEnd++) {
+        if (classSource[methodEnd] === '{') depth++;
+        else if (classSource[methodEnd] === '}') depth--;
+    }
+    return classSource.slice(methodStart, methodEnd);
+}
+const sharedMethodNames = [['PoolOneVOneMain', 'changeTurn'], ['PoolCanvas', 'getVisualCue'],
+    ['GameViewBase', 'getLocalPos'], ['GameViewBase', 'getCurUser'], ['GameViewBase', 'isMainPlayerOperation']];
+const sharedCueMethods = actualSource ? '(function(){var t=PoolOneVOneMain;\n' + sharedMethodNames
+    .map(([className, methodName]) => `${className}.prototype.${methodName}=${actualMethod(className, methodName)};`).join('\n') + '\n}());' : sharedCueSnapshot;
 
 class Element {
     constructor(tag) {
@@ -75,7 +94,7 @@ function fixture(saved = new Map()) {
     };
     function rows(table) { return table === 'ArtifactInfo' ? configs : table === 'cue_res' ? Object.values(resources) : tables[table] || []; }
     function forbidden(name) { return function () { network.push(name); throw Error('Unexpected network action: ' + name); }; }
-    const mainUser = Object.freeze({id: 42, usingCubeId: 90001, cueForce: 420, cueTipLine: 280, cueSpin: 560,
+    const mainUser = Object.freeze({id: 42, tableidx: 1, pkScore: 0, usingCubeId: 90001, cueForce: 420, cueTipLine: 280, cueSpin: 560,
         cueConfig: configs[0], getCueColor() { return 1; }, equipBagCue: Object.freeze({id: 90001, color: 1, star: 2})});
     const stage = {$children: []};
     const intervals = new Map(); let timerId = 0;
@@ -102,6 +121,7 @@ function fixture(saved = new Map()) {
         CueConfigModel: {instance: {getCueConfigData: id => configs.find(cue => cue.id === Number(id))}},
         LG: {getInfo: value => value === 50001 ? '战争女神·雅典娜' : String(value)},
         GameViewBase: function GameViewBase() {},
+        PoolCanvas: function PoolCanvas() {},
         WindowBase: function WindowBase() {}, OnePlayerRules: function OnePlayerRules() {},
         SecureNumber: {CreateSecureNumber: value => value},
         __extends(derived, base) { derived.prototype = Object.create(base.prototype); derived.prototype.constructor = derived; },
@@ -111,7 +131,7 @@ function fixture(saved = new Map()) {
         Rules8Ball: function Rules8Ball() {}
     };
     s.window = s;
-    s.GameUtils = {getCueResByColor(id, color) {
+    s.GameUtils = {getUserLineSkin() { return null; }, getCueResByColor(id, color) {
         const config = configs.find(cue => cue.id === Number(id));
         const row = config?.fxbag.find(item => item[0] === Number(color));
         return resources[row?.[1]];
@@ -125,10 +145,11 @@ function fixture(saved = new Map()) {
     vm.createContext(s);
     if (actualSource) {
         // Evaluate only selected class definitions. None of their constructors or game startup code runs.
-        for (const name of ['GameViewBase', 'PoolLianXiView', 'SnkLianXiGameView', 'Rules8BallDanRenLianXi', 'RulesSnkLianXi']) {
+        for (const name of ['GameViewBase', 'PoolLianXiView', 'SnkLianXiGameView', 'Rules8BallDanRenLianXi', 'RulesSnkLianXi', 'PoolOneVOneMain']) {
             vm.runInContext(actualClass(name), s);
         }
     } else vm.runInContext(gameMethods, s);
+    vm.runInContext(sharedCueMethods, s);
     s.GameViewBase.prototype.cleanDaoJuData = function () { throw Error('Do not clear live power-up state'); };
     s.GameViewBase.prototype.saveLevelDaoJuData = function () {};
     let currentGuides = [];
@@ -145,10 +166,11 @@ function fixture(saved = new Map()) {
         else if (kind === 'SnkLianXiGameView') s.BaseDef.gameType = 'snookerpractice';
         else s.BaseDef.gameType = '8ball1v1';
         const view = Object.create(s[kind].prototype);
-        Object.assign(view, {stage, $stage: stage, parent: stage, visible: true, _isDanJi: true,
+        Object.assign(view, {stage, $stage: stage, parent: stage, visible: true,
+            _isDanJi: kind === 'PoolLianXiView' || kind === 'SnkLianXiGameView', _chairUsers: [],
             _cueForce: 300, _cueTipLine: 200, _cueSpin: 400, _cueShowSpin: 560,
             _daojupowerBet: 1, _daojuaimBet: 1, _daojurotateBet: 1,
-            _crossView: {update() {}}, isMainPlayerOperation() { return true; },
+            _crossView: {update() {}},
             dispose() { this.parent = null; this.stage = null; this.$stage = null; }, listeners: {},
             addEventListener(type, listener, context) { this.listeners[type] = () => listener.call(context); },
             removeEventListener(type) { delete this.listeners[type]; }});
@@ -162,14 +184,49 @@ function fixture(saved = new Map()) {
             setCueResId(id, resId, star) { if (!resources[resId]) throw Error('missing cue resource'); this.showCue(id, resources[resId], star); },
             showCue(id, res, star) { if (this.failRes === res.id) throw Error('resource failed to load'); this._cueId = Number(id); this._cueRes = res; this._cueStar = star; this.calls.push({id, resId: res.id, star}); }};
         guide.visualCue = cue;
-        view.poolCanvas = {visualCue: cue, rules: rule, englishControl: {englishX: .2, englishY: .1}, crossView: {updateData() {}}};
+        view.poolCanvas = {visualCue: cue, rules: rule, _gameView: view,
+            getVisualCue: s.PoolCanvas.prototype.getVisualCue,
+            englishControl: {englishX: .2, englishY: .1, reset() { this.englishX = this.englishY = 0; }}, crossView: {updateData() {}}};
+        if (kind === 'PoolOneVOneMain') setupNetwork({view, cue, guide, rule});
         currentGuides = [guide]; stage.$children = [view];
         return {view, cue, guide, rule};
+    }
+    function setupNetwork(current) {
+        const {view, cue, rule} = current;
+        const user = (id, chair, config, color, star) => ({id, tableidx: chair, isBot: false,
+            usingCubeId: config.id, cueConfig: config, curCueColor: color, cueStar: star,
+            cueForce: config.force, cueTipLine: config.line, cueSpin: config.spin});
+        const self = user(42, 1, configs[0], 1, 2), opponent = user(84, 2, configs[1], 13, 1);
+        view._chairUsers = [null, self, opponent]; view._roomUsers = {42: self, 84: opponent};
+        view._localIndexUserArr = [self, opponent]; view._myChairId = 1; view._curChairId = 1;
+        view._localPosDic = {1: 0, 2: 1}; view._isAddGame = true;
+        view.players = [{id: 42, isBot: false}, {id: 84, isBot: false}];
+        view._angleView = {enabledView() {}, disabledView() {}};
+        view._powerView = {enabledView() {}, disabledView() {}};
+        view._headViewArr = [{startDrawBorderBar() {}}, {startDrawBorderBar() {}}];
+        view.m_cAimEventQueue = {reset() {}};
+        for (const method of ['stopTimer', 'setTimer', 'hideCenterGameTip', 'removeOfflineTip', 'hideCushionGroup',
+            'hideCushionTips', 'rotationCueToTargetBall', 'clearBoderProgress', 'hideCrossView', 'showTotalTime', 'assigendGroupAni']) {
+            view[method] = function () {};
+        }
+        view.cleanDaoJuData = function () { this._daojupowerBet = this._daojuaimBet = this._daojurotateBet = 1; };
+        Object.assign(rule, {isTuiQiu: false, playerInTurnIndex: 0, playerInTurn: self,
+            takeCueBall() {}, respotCueBall() {}, getPlayerBllGroupByIndex() { return 0; }, isInBreak() { return false; },
+            setTurnOwner(index) { this.playerInTurnIndex = index; this.playerInTurn = view._chairUsers[index + 1]; }});
+        Object.assign(rule.table, {animator: {animating: false}, cueBall: {movable: false}});
+        view.poolCanvas.visualBallManager = {createBallTailEffect() {}, removeBallTailEffectByIndex() {}};
+        view.poolCanvas._otherPlayerCue = {cueId: 90002, cueRes: resources[502], _gameView: view, visible: true};
+        current.self = self; current.opponent = opponent;
+        current.changeTurn = chair => view.changeTurn(10, chair);
+        assert.equal(view.poolCanvas.getVisualCue(1, true), cue);
+        assert.equal(view.poolCanvas.getVisualCue(2, true), cue);
+        return current;
     }
     vm.runInContext(fs.readFileSync(path.join(__dirname, 'cue_levels.js'), 'utf8'), s);
     vm.runInContext(moduleSource(), s);
     const api = s.__poolGuideLocalCues.attach(state);
     return {s, state, api, scene, saved, configs, resources, tables, network, intervals, calls,
+        networkScene() { const current = scene('PoolOneVOneMain'); return setupNetwork(current); },
         setGuides(guides) { currentGuides = guides; },
         refresh() { state.controls.refresh(); }, get: id => find(body, id)};
 }
@@ -210,6 +267,15 @@ test('inspected source matches the gameplay method fixture and both practice sce
             assert.ok(scene.includes(`new ${rule}`));
         }
     });
+
+test('shared-cue turn fixtures match the actual native update ordering', {skip: !actualSource}, () => {
+    for (const [className, methodName] of sharedMethodNames) {
+        assert.ok(sharedCueSnapshot.includes(actualMethod(className, methodName)), `${className}.${methodName} changed`);
+    }
+    const change = actualMethod('PoolOneVOneMain', 'changeTurn');
+    assert.ok(change.indexOf('this._curChairId=i') < change.indexOf('this.poolCanvas.visualCue.setCueData'));
+    assert.ok(change.indexOf('this.poolCanvas.visualCue.setCueData') < change.indexOf('this.poolCanvas.rules.setTurnOwner'));
+});
 
 test('unowned cues and variants are searchable without adding them to the account bag', () => {
     const f = fixture();
@@ -274,6 +340,120 @@ test('unowned appearance and effect resources display in a network scene without
     assert.ok(!status.error); assert.equal(cue.cueId, 90002); assert.equal(cue.cueRes.id, 503);
     assert.deepEqual(globalStats(f.s), before); assert.deepEqual(viewStats(view), [300, 200, 400, 560]);
     assert.equal(f.s.MainUser.instance.usingCubeId, 90001); assert.deepEqual(f.network, []);
+});
+
+test('the same native visualCue displays only our override across self-opponent-self turns', () => {
+    const f = fixture(); const current = f.networkScene();
+    const shared = current.cue;
+    assert.equal(current.view.poolCanvas.getVisualCue(1, true), shared);
+    assert.equal(current.view.poolCanvas.getVisualCue(2, true), shared);
+    assert.equal(f.api.configure({cueId: 90613}).visualCount, 1); assert.equal(shared.cueId, 90613);
+    current.changeTurn(2);
+    assert.equal(shared.cueId, current.opponent.usingCubeId, 'opponent must retain native cue immediately during changeTurn');
+    assert.equal(shared.cueRes.id, 502);
+    const opponentStats = globalStats(f.s); f.refresh(); f.refresh();
+    assert.equal(shared.cueId, current.opponent.usingCubeId); assert.deepEqual(globalStats(f.s), opponentStats);
+    current.changeTurn(1);
+    assert.equal(current.cue, shared); assert.equal(shared.cueId, 90613, 'our selected appearance resumes without another apply');
+    f.refresh(); assert.equal(shared.cueId, 90613); assert.equal(f.api.status().practiceActive, false);
+    assert.equal(f.s.MainUser.instance.usingCubeId, 90001); assert.deepEqual(f.network, []);
+});
+
+test('applying during the opponent turn leaves its cue and stats alone until our turn begins', () => {
+    const f = fixture(); const current = f.networkScene(); current.changeTurn(2);
+    const before = globalStats(f.s), beforeView = viewStats(current.view);
+    const status = f.api.configure({cueId: 90613});
+    assert.equal(current.cue.cueId, current.opponent.usingCubeId); assert.equal(current.cue.cueRes.id, 502);
+    assert.equal(status.practiceActive, false); assert.equal(status.visualCount, 0);
+    f.refresh(); assert.deepEqual(globalStats(f.s), before); assert.deepEqual(viewStats(current.view), beforeView);
+    assert.equal(current.cue.cueId, current.opponent.usingCubeId);
+    current.changeTurn(1); assert.equal(current.cue.cueId, 90613); assert.deepEqual(f.network, []);
+});
+
+test('opponent equipment updates and reset preserve the latest opponent resource rather than our old cue', () => {
+    const f = fixture(); const current = f.networkScene(); f.api.configure({cueId: 90613});
+    current.changeTurn(2);
+    current.opponent.curCueColor = 14; current.opponent.cueStar = 5;
+    current.opponent.cueForce = 840; current.opponent.cueTipLine = 560; current.opponent.cueSpin = 700;
+    current.changeTurn(2); assert.equal(current.cue.cueRes.id, 503);
+    const before = globalStats(f.s), fields = viewStats(current.view);
+    f.api.reset();
+    assert.equal(current.cue.cueId, 90002); assert.equal(current.cue.cueRes.id, 503); assert.equal(current.cue._cueStar, 5);
+    assert.deepEqual(globalStats(f.s), before); assert.deepEqual(viewStats(current.view), fields);
+});
+
+test('players using the same cue id are distinguished by player identity', () => {
+    const f = fixture(); const current = f.networkScene();
+    Object.assign(current.opponent, {usingCubeId: 90001, cueConfig: f.configs[0], curCueColor: 1,
+        cueForce: 420, cueTipLine: 280, cueSpin: 560});
+    f.api.configure({cueId: 90613}); assert.equal(current.cue.cueId, 90613);
+    current.changeTurn(2); assert.equal(current.cue.cueId, 90001);
+    f.refresh(); assert.equal(current.cue.cueId, 90001);
+    current.changeTurn(1); assert.equal(current.cue.cueId, 90613);
+});
+
+test('unknown chairs and missing player ids fail closed despite the native default-true operation helper', () => {
+    const mutations = [
+        current => { current.view._curChairId = undefined; },
+        current => { current.view._curChairId = 0; },
+        current => { current.view._curChairId = 3; },
+        current => { current.view._isAddGame = false; },
+        current => { current.view._chairUsers = []; },
+        current => { current.view._chairUsers = []; current.view._isDanJi = true; },
+        current => { current.self.id = undefined; },
+        current => { current.self.id = null; },
+        current => { current.self.id = ''; },
+        current => { current.self.id = 0; },
+        (current, f) => { f.s.MainUser.instance = null; },
+        (current, f) => { f.s.MainUser = undefined; },
+        (current, f) => { f.s.MainUser.instance = {...f.s.MainUser.instance, id: undefined}; },
+        (current, f) => { f.s.MainUser.instance = {...f.s.MainUser.instance, id: ''}; }
+    ];
+    for (const mutate of mutations) {
+        const f = fixture(); const current = f.networkScene(); mutate(current, f);
+        const before = globalStats(f.s), fields = viewStats(current.view);
+        if (!current.view._chairUsers[current.view._curChairId]) assert.equal(current.view.isMainPlayerOperation(), true);
+        f.api.configure({cueId: 90613}); f.refresh();
+        assert.equal(current.cue.cueId, 90001, mutate.toString()); assert.equal(f.api.status().visualCount, 0);
+        assert.deepEqual(globalStats(f.s), before); assert.deepEqual(viewStats(current.view), fields);
+    }
+});
+
+test('numeric and string forms of the known same player id still identify our turn', () => {
+    const f = fixture(); const current = f.networkScene(); current.self.id = '42';
+    f.api.configure({cueId: 90613}); assert.equal(current.cue.cueId, 90613);
+    current.changeTurn(2); assert.equal(current.cue.cueId, 90002);
+});
+
+test('spectator and replay flags on a normal room view never alter the shared cue', () => {
+    for (const name of ['_isGuanZhan', 'isGuanZhan', 'isPlayback', '_isPlayback', '_playback']) {
+        const f = fixture(); const current = f.networkScene(); current.view[name] = true;
+        const before = globalStats(f.s); f.api.configure({cueId: 90613}); f.refresh();
+        assert.equal(current.cue.cueId, 90001, name); assert.deepEqual(globalStats(f.s), before);
+    }
+});
+
+test('native push-out cue routing never applies the local override to either participant', () => {
+    for (const chair of [1, 2]) {
+        const f = fixture(); const current = f.networkScene(); current.view._curChairId = chair;
+        current.rule.isTuiQiu = true;
+        assert.equal(current.view.poolCanvas.getVisualCue(1, true), current.cue);
+        assert.equal(current.view.poolCanvas.getVisualCue(1, false), null);
+        assert.equal(current.view.poolCanvas.getVisualCue(2, true), current.view.poolCanvas._otherPlayerCue);
+        const before = globalStats(f.s); f.api.configure({cueId: 90613}); f.refresh();
+        assert.equal(current.cue.cueId, 90001); assert.equal(current.view.poolCanvas._otherPlayerCue.cueId, 90002);
+        assert.deepEqual(globalStats(f.s), before); assert.equal(f.api.status().practiceActive, false);
+    }
+});
+
+test('entering native push-out pauses our appearance and leaving it resumes only our known turn', () => {
+    const f = fixture(); const current = f.networkScene();
+    f.api.configure({cueId: 90613}); assert.equal(current.cue.cueId, 90613);
+    current.rule.isTuiQiu = true; f.refresh(); assert.equal(current.cue.cueId, 90001);
+    current.rule.isTuiQiu = false; f.refresh(); assert.equal(current.cue.cueId, 90613);
+    current.changeTurn(2); assert.equal(current.cue.cueId, 90002);
+    current.rule.isTuiQiu = true; f.refresh(); assert.equal(current.cue.cueId, 90002);
+    current.rule.isTuiQiu = false; f.refresh(); assert.equal(current.cue.cueId, 90002);
 });
 
 for (const kind of ['PoolLianXiView', 'SnkLianXiGameView']) test(`real game cue conversion is used in ${kind}`, () => {

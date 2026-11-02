@@ -1,14 +1,14 @@
 {
-  "apk": "noroot-game/.work/PoolGame-NoRoot-3.2.1-pg4-base.apk",
+  "apk": "noroot-game/.work/PoolGame-NoRoot-3.2.1-pg5-base.apk",
   "package": "com.krmtqds.aligames",
   "version": "3.2.1",
-  "build": "pg4",
+  "build": "pg5",
   "bytes": 178448267,
-  "sha256": "830205a9f9cf2faca4ba6d7043c21d5c55f179fd7884dc6ad3c3e0d40131ca2c",
+  "sha256": "55b988e532babea71a05c619f6723ba4a31a39c5b7d95da0da93f88dac3aa756",
   "original_sha256": "e677e9529351bc558d010d4ae5bd173a555a8fba811deb75174065fc5f938214",
   "apktool_sha256": "66cf4524a4a45a7f56567d08b2c9b6ec237bcdd78cee69fd4a59c8a0243aeafa",
-  "payload_bytes": 113572,
-  "payload_sha256": "314950b035d126286cf4fbf1edd5a11285cab6912da930b20469055ec20da4b2",
+  "payload_bytes": 115388,
+  "payload_sha256": "365e93d99befc2cd4f07d5926b33bae651d3bf564a7c9481987569c03cf79944",
   "callback_source_sha256": "3943e3d66ecf2770fc85a058db53047096af45d98701fe61886bb39f258d23e3",
   "zip_verification": {
     "unchanged_original_entries": 3762,
@@ -33,8 +33,9 @@
     "server acceptance of pocket changes",
     "compatibility with downloaded game updates"
   ],
+  "js_refresh_source_sha256": "830205a9f9cf2faca4ba6d7043c21d5c55f179fd7884dc6ad3c3e0d40131ca2c",
   "final_package_verification": {
-    "apk_sha256": "830205a9f9cf2faca4ba6d7043c21d5c55f179fd7884dc6ad3c3e0d40131ca2c",
+    "apk_sha256": "55b988e532babea71a05c619f6723ba4a31a39c5b7d95da0da93f88dac3aa756",
     "zip_entries": {
       "unchanged_original_entries": 3762,
       "changed_entries": [
