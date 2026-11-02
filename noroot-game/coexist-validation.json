@@ -1,13 +1,13 @@
 {
-  "apk": "PoolGame-NoRoot-Coexist-3.2.1-pg3.apk",
-  "bytes": 178415499,
-  "sha256": "95a8a2d6cfd908fa64fe8dda5fcb49ba80d00f065d19c15929ab70bf999bc4bd",
-  "base_sha256": "ba54f840f23f779ca40475fba5fe1a2a73feb9ea0e12cbaa480cce7ae261673e",
+  "apk": "PoolGame-NoRoot-Coexist-3.2.1-pg4.apk",
+  "bytes": 178419595,
+  "sha256": "e70d2cae62a9bd76b50b69dc8e9c7ba23442394ec2ce88fb117153e1d983e5e1",
+  "base_sha256": "830205a9f9cf2faca4ba6d7043c21d5c55f179fd7884dc6ad3c3e0d40131ca2c",
   "original_sha256": "e677e9529351bc558d010d4ae5bd173a555a8fba811deb75174065fc5f938214",
   "package": "io.lizuping.poolguide.game",
   "label": "台球大师·测试",
   "version": "3.2.1",
-  "build": "pg3",
+  "build": "pg4",
   "build_date": "2026-11-02",
   "manifest_changes": {
     "old_package": "com.krmtqds.aligames",
@@ -242,13 +242,13 @@
     "bytes": 435168
   },
   "js_channel_identity": "com.krmtqds.aligames",
-  "payload_sha256": "33102f8ad3f73c56f64b25fbe9c871ee6ee280323e1d957c413c60917d02b8a3",
+  "payload_sha256": "c0a7ca1474b9ecd76d49e1a87a5202a1f1a104bcf51cad905f4b073500dc0e72",
   "fixes": {
     "unzip_progress_poll_interval_ms": 100,
     "java_heap_limit_changed": false
   },
   "offline_verification": {
-    "apk_sha256": "95a8a2d6cfd908fa64fe8dda5fcb49ba80d00f065d19c15929ab70bf999bc4bd",
+    "apk_sha256": "e70d2cae62a9bd76b50b69dc8e9c7ba23442394ec2ce88fb117153e1d983e5e1",
     "package": "io.lizuping.poolguide.game",
     "label": "台球大师·测试",
     "changed_entries_from_base": [

@@ -50,16 +50,30 @@ function fixture(saved = new Map()) {
     const panel = new Element('div'); panel.id = 'poolguide-live-controls'; body.appendChild(panel);
     function find(node, id) { if (node.id === id) return node; for (const child of node.children) { const found = find(child, id); if (found) return found; } return null; }
     const configs = [
-        {id: 90001, name: '已拥有基础杆', force: 420, line: 280, spin: 560, color: 1, fxbag: [[1, 501]]},
-        {id: 90002, name: '未拥有试验杆', force: 980, line: 840, spin: 1260, color: 13, fxbag: [[13, 502], [14, 503]]},
-        {id: 90003, name: '缺失资源杆', force: 700, line: 560, spin: 420, color: 2, fxbag: [[2, 599]]}
+        {id: 90001, group: 1, name: '已拥有基础杆', force: 420, line: 280, spin: 560, time: 20, color: 1, fxbag: [[1, 501]]},
+        {id: 90002, group: 2, name: '未拥有试验杆', force: 980, line: 840, spin: 1260, time: 20, color: 13, fxbag: [[13, 502], [14, 503]]},
+        {id: 90003, group: 3, name: '缺失资源杆', force: 700, line: 560, spin: 420, time: 20, color: 2, fxbag: [[2, 599]]},
+        {id: 90613, group: 4, name: 50001, force: 1120, line: 980, spin: 1400, time: 20, color: 14, fxbag: [[14, 504]]}
     ];
     const resources = {
         501: {id: 501, color: 1, name: '基础外观', pic: 'owned_png', force: 420, line: 280, spin: 560},
         502: {id: 502, color: 13, name: '试验外观', pic: 'unowned_png', particle: 'testParticle', force: 980, line: 840, spin: 1260},
-        503: {id: 503, color: 14, name: '试验变色', mc: 'testCueMc', force: 1120, line: 980, spin: 1400}
+        503: {id: 503, color: 14, name: '试验变色', mc: 'testCueMc', force: 1120, line: 980, spin: 1400},
+        504: {id: 504, color: 14, name: '雅典娜外观', pic: '', mc: '0',
+            particle: '{"cueId":90613,"arr":[{"res":["athena_cue_png"]}]}', force: 1120, line: 980, spin: 1400}
     };
     const network = [];
+    const tables = {
+        ArtifactStar: configs.flatMap(config => config.fxbag.map(([color], index) => ({
+            id: config.group * 100 + index, group: config.group, color, star: 2,
+            force_rate: 0, line_rate: 0, spin_rate: 0, time_rate: 0
+        }))),
+        cue_levelinfo: configs.map(config => ({id: config.group * 1000, group: config.group, level: 9,
+            level_show: 9, force_up: 0, line_up: 0, spin_up: 0, time_up: 0})),
+        ballArmQuality: [{id: 200, group: 2, color: 13}],
+        Consts: [{id: 'star_levelplus', Value: 1}]
+    };
+    function rows(table) { return table === 'ArtifactInfo' ? configs : table === 'cue_res' ? Object.values(resources) : tables[table] || []; }
     function forbidden(name) { return function () { network.push(name); throw Error('Unexpected network action: ' + name); }; }
     const mainUser = Object.freeze({id: 42, usingCubeId: 90001, cueForce: 420, cueTipLine: 280, cueSpin: 560,
         cueConfig: configs[0], getCueColor() { return 1; }, equipBagCue: Object.freeze({id: 90001, color: 1, star: 2})});
@@ -79,11 +93,14 @@ function fixture(saved = new Map()) {
         PoolMath: {CUE_PROPERTIES_MAX_POWER: 300, CUE_PROPERTIES_ACCURACY: .2, CUE_PROPERTIES_SPIN: .4},
         egret: {MainContext: {instance: {stage}}, Event: {REMOVED_FROM_STAGE: 'removedFromStage'},
             is: (object, name) => object && (object.__class__ === name || object.__gameClass === name)},
-        cn: {ArtifactInfo: 'ArtifactInfo', cue_res: 'cue_res'},
-        cf: {getItem: (table, id) => table === 'ArtifactInfo' ? configs.find(cue => cue.id === Number(id)) : resources[id],
-            getItemByCondition: table => table === 'ArtifactInfo' ? configs : Object.values(resources)},
+        cn: {ArtifactInfo: 'ArtifactInfo', cue_res: 'cue_res', ArtifactStar: 'ArtifactStar',
+            cue_levelinfo: 'cue_levelinfo', ballArmQuality: 'ballArmQuality', Consts: 'Consts'},
+        cf: {getItem: (table, id) => rows(table).find(item => String(item.id) === String(id)),
+            getItemByCondition: (table, key, value) => key ? rows(table).filter(item => item[key] === value) : rows(table),
+            getItemByConditions: (table, keys, values) => rows(table).filter(item => keys.every((key, index) => item[key] === values[index])),
+            getConfigArr_new: table => rows(table)},
         CueConfigModel: {instance: {getCueConfigData: id => configs.find(cue => cue.id === Number(id))}},
-        LG: {getInfo: value => String(value)},
+        LG: {getInfo: value => value === 50001 ? '战争女神·雅典娜' : String(value)},
         GameViewBase: function GameViewBase() {},
         WindowBase: function WindowBase() {}, OnePlayerRules: function OnePlayerRules() {},
         SecureNumber: {CreateSecureNumber: value => value},
@@ -149,9 +166,10 @@ function fixture(saved = new Map()) {
         currentGuides = [guide]; stage.$children = [view];
         return {view, cue, guide, rule};
     }
+    vm.runInContext(fs.readFileSync(path.join(__dirname, 'cue_levels.js'), 'utf8'), s);
     vm.runInContext(moduleSource(), s);
     const api = s.__poolGuideLocalCues.attach(state);
-    return {s, state, api, scene, saved, configs, resources, network, intervals, calls,
+    return {s, state, api, scene, saved, configs, resources, tables, network, intervals, calls,
         setGuides(guides) { currentGuides = guides; },
         refresh() { state.controls.refresh(); }, get: id => find(body, id)};
 }
@@ -203,6 +221,22 @@ test('unowned cues and variants are searchable without adding them to the accoun
     assert.deepEqual(f.network, []);
 });
 
+test('Athena is the first choice and remains searchable by name and id', () => {
+    const f = fixture();
+    assert.equal(f.api.list('', 0, 20).items[0].id, 90613);
+    assert.equal(f.get('poolguide-cue-select').value, '90613');
+    assert.equal(f.api.list('雅典娜', 0, 20).items[0].id, 90613);
+    assert.equal(f.api.list('90613', 0, 20).items[0].id, 90613);
+});
+
+test('particle-only Athena resources remain selectable and usable in local practice', () => {
+    const f = fixture(); const {cue} = f.scene();
+    const status = f.api.configure({cueId: 90613});
+    assert.equal(status.practiceActive, true); assert.equal(status.maxProfile.maxed, true);
+    assert.equal(status.maxProfile.hasParticle, true); assert.equal(cue.cueRes.id, 504);
+    assert.equal(f.api.list('90613', 0, 20).items[0].resources[0].id, 504);
+});
+
 test('attach is idempotent, mounts one panel, and reuses the existing scheduler', () => {
     const f = fixture();
     assert.equal(f.s.__poolGuideLocalCues.attach(f.state), f.api);
@@ -211,13 +245,12 @@ test('attach is idempotent, mounts one panel, and reuses the existing scheduler'
     f.refresh(); assert.equal(f.calls.refresh, 1);
 });
 
-test('a practice checkbox draft survives periodic refresh before pressing apply', () => {
+test('the practice switch is absent and applying a choice uses practice attributes by default', () => {
     const f = fixture(); f.scene();
     f.get('poolguide-cue-search').value = '90002'; f.get('poolguide-cue-search').fire('input');
     assert.equal(f.get('poolguide-cue-select').value, '90002');
-    f.get('poolguide-cue-practice').checked = true;
+    assert.equal(f.get('poolguide-cue-practice'), null);
     f.refresh(); f.refresh();
-    assert.equal(f.get('poolguide-cue-practice').checked, true);
     f.get('poolguide-cue-apply').fire();
     assert.equal(f.api.status().practiceActive, true);
 });
@@ -235,9 +268,9 @@ test('the cue list is paged and can return to the previous page without creating
     f.get('poolguide-cue-previous').fire(); assert.equal(select.value, first); assert.equal(select.options.length, 20);
 });
 
-test('unowned appearance and effect resources display without equipping or changing stats', () => {
-    const f = fixture(); const {view, cue} = f.scene(); const before = globalStats(f.s);
-    const status = f.api.configure({cueId: 90002, color: 14, resId: 503, practiceAttributes: false});
+test('unowned appearance and effect resources display in a network scene without changing its stats', () => {
+    const f = fixture(); const {view, cue} = f.scene('PoolOneVOneMain'); const before = globalStats(f.s);
+    const status = f.api.configure({cueId: 90002, color: 14, resId: 503});
     assert.ok(!status.error); assert.equal(cue.cueId, 90002); assert.equal(cue.cueRes.id, 503);
     assert.deepEqual(globalStats(f.s), before); assert.deepEqual(viewStats(view), [300, 200, 400, 560]);
     assert.equal(f.s.MainUser.instance.usingCubeId, 90001); assert.deepEqual(f.network, []);
@@ -245,13 +278,44 @@ test('unowned appearance and effect resources display without equipping or chang
 
 for (const kind of ['PoolLianXiView', 'SnkLianXiGameView']) test(`real game cue conversion is used in ${kind}`, () => {
     const f = fixture(); const {view, cue} = f.scene(kind); const original = globalStats(f.s);
-    const status = f.api.configure({cueId: 90002, color: 13, resId: 502, practiceAttributes: true});
+    const status = f.api.configure({cueId: 90002, color: 13, resId: 502});
     assert.ok(!status.error); assert.equal(status.practiceActive, true); assert.equal(cue.cueId, 90002);
     close(viewStats(view), [700, 600, 900, 1260]);
     close(globalStats(f.s), [700, .6, .9, 1260]);
     f.api.reset(); assert.equal(cue.cueId, 90001); assert.equal(cue.cueRes.id, 501);
     assert.deepEqual(viewStats(view), [300, 200, 400, 560]); assert.deepEqual(globalStats(f.s), original);
     assert.deepEqual(f.network, []);
+});
+
+test('legacy practiceAttributes values cannot disable automatic practice attributes', () => {
+    for (const legacy of [false, true, 'false', undefined]) {
+        const f = fixture(); f.scene();
+        const status = f.api.configure({cueId: 90002, color: 13, practiceAttributes: legacy});
+        assert.ok(!status.error); assert.equal(status.practiceActive, true, `legacy value ${legacy}`);
+    }
+});
+
+test('the default selection uses the maximum profile resource and star without changing config or bag data', () => {
+    const f = fixture(); const {cue} = f.scene();
+    const original = JSON.stringify({configs: f.configs, tables: f.tables, resources: f.resources});
+    const originalBag = f.s.MainUser.instance.equipBagCue;
+    const status = f.api.configure({cueId: 90002});
+    assert.equal(status.practiceActive, true); assert.equal(status.maxProfile.maxed, true);
+    assert.equal(status.maxProfile.color, 14); assert.equal(status.maxProfile.star, 2);
+    assert.equal(status.maxProfile.level, 9); assert.equal(cue.cueRes.id, 503);
+    f.refresh(); f.api.reset();
+    assert.equal(JSON.stringify({configs: f.configs, tables: f.tables, resources: f.resources}), original);
+    assert.equal(f.s.MainUser.instance.equipBagCue, originalBag); assert.equal(originalBag.star, 2);
+    assert.equal(f.s.BagModel.instance.getBagCue(90002), undefined); assert.deepEqual(f.network, []);
+});
+
+test('missing max-level configuration still permits appearance but never pretends practice stats are maxed', () => {
+    const f = fixture(); const {cue, view} = f.scene(); const before = globalStats(f.s);
+    f.tables.cue_levelinfo = [];
+    const status = f.api.configure({cueId: 90002, resId: 502});
+    assert.equal(cue.cueId, 90002); assert.equal(status.practiceActive, false);
+    assert.equal(status.maxProfile.maxed, false); assert.ok(status.maxProfile.reason);
+    assert.deepEqual(globalStats(f.s), before); assert.deepEqual(viewStats(view), [300, 200, 400, 560]);
 });
 
 test('network, preview, replay, mismatched rule, and stale mode never receive practice stats', () => {
@@ -325,7 +389,17 @@ test('selection is remembered per account, but never auto-applies after a new do
     assert.equal(next.get('poolguide-cue-select').value, '90002');
     assert.equal(next.get('poolguide-cue-resources').value, '503');
     assert.equal(next.get('poolguide-cue-color').value, '14');
-    assert.equal(next.get('poolguide-cue-practice').checked, false);
+    assert.equal(next.get('poolguide-cue-practice'), null);
+});
+
+test('an existing pg3 account selection is retained under the original storage key', () => {
+    const saved = new Map([['poolguide-local-cue-v1:42', JSON.stringify({cueId: 90002, color: 13, resId: 502})]]);
+    const f = fixture(saved); const {cue} = f.scene(); f.refresh();
+    assert.equal(f.api.status().cueId, 90002); assert.equal(cue.cueId, 90001);
+    assert.equal(f.get('poolguide-cue-select').value, '90002');
+    const status = f.api.configure({cueId: 90002});
+    assert.equal(status.practiceActive, true);
+    assert.equal(JSON.parse(saved.get('poolguide-local-cue-v1:42')).cueId, 90002);
 });
 
 test('changing the account revokes the active local appearance and practice stats', () => {
@@ -363,7 +437,7 @@ test('choosing a practice cue never changes the pulled power or English control 
 
 test('invalid ids, nonfinite attributes and missing resources preserve game state', () => {
     const f = fixture(); const {cue, view} = f.scene(); const before = globalStats(f.s);
-    f.resources[599] = {id: 599, pic: '0', mc: '0'};
+    f.resources[599] = {id: 599, pic: '0', mc: '0', particle: '0'};
     assert.equal(f.api.list('90003', 0, 20).items[0].resources.length, 0,
         'string zero placeholders are not drawable cue resources');
     for (const selection of [{cueId: -1}, {cueId: 999999}, {cueId: 90003, color: 2, resId: 599}, {cueId: 90002, resId: 501}]) {

@@ -2,6 +2,7 @@
 (function (root) {
     'use strict';
     var KEY = 'poolguide-local-cue-v1:';
+    var ATHENA = 90613;
     var FIELD_NAMES = ['_cueForce', '_cueTipLine', '_cueSpin', '_cueShowSpin'];
     var MATH_NAMES = ['CUE_PROPERTIES_MAX_POWER', 'CUE_PROPERTIES_ACCURACY', 'CUE_PROPERTIES_SPIN'];
 
@@ -38,6 +39,23 @@
             return root.cf && root.cn ? root.cf.getItem(root.cn.ArtifactInfo, id) || null : null;
         } catch (ignored) { return null; }
     }
+    function nativeVisual(data) {
+        if (!data) { return false; }
+        if (root.__poolGuideCueLevels && typeof root.__poolGuideCueLevels.hasVisual === 'function') {
+            return root.__poolGuideCueLevels.hasVisual(data);
+        }
+        if ((data.pic && String(data.pic) !== '0') || (data.mc && String(data.mc) !== '0')) { return true; }
+        try {
+            var particles = typeof data.particle === 'string' ? JSON.parse(data.particle) : data.particle;
+            if (particles && Array.isArray(particles.arr)) {
+                for (var i = 0; i < particles.arr.length; i++) {
+                    var part = particles.arr[i];
+                    if (part && Array.isArray(part.res) && part.res.length) { return true; }
+                }
+            }
+        } catch (ignored) {}
+        return false;
+    }
     function resources(cue) {
         var result = [];
         if (!cue || !Array.isArray(cue.fxbag) || !root.cf || !root.cn) { return result; }
@@ -46,7 +64,7 @@
             if (!Array.isArray(pair) || !validId(Number(pair[1]))) { continue; }
             try {
                 var data = root.cf.getItem(root.cn.cue_res, Number(pair[1]));
-                if (data && ((data.pic && String(data.pic) !== '0') || (data.mc && String(data.mc) !== '0'))) {
+                if (nativeVisual(data)) {
                     result.push({id: Number(pair[1]), color: Number(pair[0]) || 0,
                         name: '颜色 ' + pair[0] + ' · 资源 ' + pair[1], data: data});
                 }
@@ -55,6 +73,7 @@
         return result;
     }
     function title(cue) {
+        if (Number(cue.id) === ATHENA) { return '雅典娜'; }
         try {
             if (root.LG && typeof root.LG.getInfo === 'function') {
                 var value = root.LG.getInfo(cue.name);
@@ -62,6 +81,19 @@
             }
         } catch (ignored) {}
         return cue.name === undefined ? '球杆 ' + cue.id : String(cue.name);
+    }
+    function maximum(id) {
+        try {
+            if (root.__poolGuideCueLevels && typeof root.__poolGuideCueLevels.profile === 'function') {
+                return root.__poolGuideCueLevels.profile(id);
+            }
+        } catch (ignored) {}
+        return {cueId: id, maxed: false, reason: '满级配置暂不可用。'};
+    }
+    function levelSummary(profile) {
+        if (!profile || !profile.maxed) { return '满级配置尚未就绪，暂保留原击球属性。'; }
+        return '已到该杆上限 · 等级 ' + profile.level + ' · 星级 ' + profile.star +
+            ' · 品质 ' + profile.color + '；单人练习自动应用。';
     }
     function listed(cue) {
         var variants = resources(cue), result = [];
@@ -88,10 +120,15 @@
             for (var i = 0; i < source.length; i++) {
                 var cue = source[i];
                 if (!cue || !validId(Number(cue.id))) { continue; }
-                if (query && String(cue.id).indexOf(query) < 0 && title(cue).toLowerCase().indexOf(query) < 0) { continue; }
+                if (query && String(cue.id).indexOf(query) < 0 && title(cue).toLowerCase().indexOf(query) < 0 &&
+                    !(Number(cue.id) === ATHENA && 'athena'.indexOf(query) >= 0)) { continue; }
                 matches.push(cue);
             }
-            matches.sort(function (a, b) { return Number(a.id) - Number(b.id); });
+            matches.sort(function (a, b) {
+                if (Number(a.id) === ATHENA) { return Number(b.id) === ATHENA ? 0 : -1; }
+                if (Number(b.id) === ATHENA) { return 1; }
+                return Number(a.id) - Number(b.id);
+            });
             for (var n = offset; n < Math.min(matches.length, offset + limit); n++) { items.push(listed(matches[n])); }
         } catch (ignored) {}
         return {items: items, total: matches.length, offset: offset};
@@ -99,7 +136,7 @@
 
     function attach(state) {
         if (state.localCues) { return state.localCues; }
-        var selected = null, armedView = null, practice = false, records = [];
+        var selected = null, selectedProfile = null, armedView = null, records = [];
         var lastAccount = account(), disposed = false, busy = false, error = '', message = '';
         var ui = null, oldRefresh = null, wrappedRefresh = null, oldDispose = null, wrappedDispose = null;
 
@@ -192,7 +229,8 @@
             var resource = variant();
             if (!resource || !armedView || record.view !== armedView) { return; }
             try {
-                record.showOriginal.call(record.cue, selected.cueId, resource.data, 0);
+                record.showOriginal.call(record.cue, selected.cueId, resource.data,
+                    selectedProfile && selectedProfile.maxed ? selectedProfile.star : 0);
                 record.changed = true;
             } catch (problem) {
                 error = '球杆资源暂不可用，已恢复原外观。';
@@ -204,12 +242,12 @@
             }
         }
         function applyAttributes(record, guide) {
-            if (!record.changed || !practice || !practiceAllowed(record.view, guide)) { restoreAttributes(record); return; }
+            if (!record.changed || !practiceAllowed(record.view, guide)) { restoreAttributes(record); return; }
             if (record.attributes) { return; }
-            var data = config(selected.cueId);
-            if (!data || !number(data.force) || !number(data.line) || !number(data.spin) ||
+            var data = selectedProfile;
+            if (!data || !data.maxed || !number(data.force) || !number(data.line) || !number(data.spin) ||
                 data.force <= 0 || data.line <= 0 || data.spin <= 0) {
-                error = '缺少基础属性，保留原练习属性。'; return;
+                error = '满级配置暂不可用，已保留原击球属性。'; return;
             }
             var saved = {fields: snapshot(record.view, FIELD_NAMES), math: snapshot(root.PoolMath, MATH_NAMES),
                 spin: root.BaseDef.CUR_CUE_SPIN, label: record.view.powerLabel && record.view.powerLabel.text};
@@ -232,7 +270,8 @@
             if (typeof cue.showCue !== 'function' || !cue.cueRes) { return null; }
             var record = {view: view, cue: cue, guide: guide, gameType: root.BaseDef && root.BaseDef.gameType,
                 showOriginal: cue.showCue, originalId: cue.cueId, originalResource: cue.cueRes,
-                originalVariant: 0, setOriginal: view.setShootBallData, disposeOriginal: view.dispose,
+                originalVariant: number(cue._cueStar) ? cue._cueStar : 0,
+                setOriginal: view.setShootBallData, disposeOriginal: view.dispose,
                 attributes: null, changed: false, failed: false};
             record.showWrapper = function (id, resource, extra) {
                 record.originalId = id; record.originalResource = resource; record.originalVariant = extra;
@@ -256,7 +295,7 @@
             }
             if (typeof record.disposeOriginal === 'function') {
                 record.disposeWrapper = function () {
-                    if (armedView === view) { armedView = null; practice = false; }
+                    if (armedView === view) { armedView = null; }
                     restoreRecord(record);
                     var index = records.indexOf(record);
                     if (index >= 0) { records.splice(index, 1); }
@@ -275,12 +314,13 @@
             } catch (ignored) {}
         }
         function read() {
-            selected = null;
+            selected = null; selectedProfile = null;
             if (!lastAccount) { return; }
             try {
                 var stored = JSON.parse(root.localStorage.getItem(KEY + lastAccount) || 'null');
                 if (stored && validId(stored.cueId) && validId(stored.resId) && integer(stored.color)) {
                     selected = {cueId: stored.cueId, color: stored.color, resId: stored.resId};
+                    selectedProfile = maximum(stored.cueId);
                 }
             } catch (ignored) {}
         }
@@ -291,7 +331,7 @@
                 if (records[i].attributes) { active = true; }
             }
             return {cueId: selected ? selected.cueId : null, color: selected ? selected.color : null,
-                resId: selected ? selected.resId : null, practiceAttributes: practice,
+                resId: selected ? selected.resId : null, maxProfile: selectedProfile,
                 practiceActive: active, visualCount: count, message: message, error: error};
         }
         function refresh() {
@@ -300,19 +340,17 @@
             try {
                 var id = account();
                 if (id !== lastAccount) {
-                    restoreAll(); armedView = null; practice = false; lastAccount = id; read();
+                    restoreAll(); armedView = null; lastAccount = id; read();
                     message = '账号已切换；选择仅供本账号手动应用。';
                     if (ui) {
                         ui.search.value = selected ? String(selected.cueId) : ''; ui.offset = 0;
-                        ui.practice.checked = false;
                         renderList(false);
                     }
                 }
                 var view = currentView();
                 if (armedView && view !== armedView) {
-                    restoreAll(); armedView = null; practice = false;
+                    restoreAll(); armedView = null;
                     message = '已退出原球桌并恢复；新球桌需重新应用。';
-                    if (ui) { ui.practice.checked = false; }
                 }
                 if (selected && armedView) {
                     var activeGuides = guides();
@@ -326,8 +364,8 @@
                     }
                     var result = status();
                     if (result.visualCount) {
-                        message = '外观仅本机可见' + (result.practiceActive ? ' · 练习基础属性已应用' :
-                            (practice ? ' · 当前场景禁止练习属性' : ' · 保持原击球属性'));
+                        message = '外观仅本机可见' + (result.practiceActive ? ' · 满级属性已自动应用' :
+                            ' · 当前场景保持原击球属性');
                     }
                 }
                 if (ui) {
@@ -336,7 +374,7 @@
                 }
             } catch (problem) {
                 error = '本地球杆暂不可用，已恢复原设置。';
-                restoreAll(); armedView = null; practice = false;
+                restoreAll(); armedView = null;
             } finally { busy = false; }
             return status();
         }
@@ -345,26 +383,25 @@
             refresh(); error = '';
             options = options || {};
             var cueId = own(options, 'cueId') ? options.cueId : selected && selected.cueId;
-            var data = config(cueId), variants = resources(data), chosen = null;
+            var data = config(cueId), variants = resources(data), chosen = null, profile = maximum(cueId);
             if (!data || !variants.length) { error = '未找到球杆或可用皮肤资源。'; return status(); }
-            if (own(options, 'practiceAttributes') && typeof options.practiceAttributes !== 'boolean') {
-                error = '练习属性开关无效。'; return status();
-            }
+            // Older callers may still pass practiceAttributes; selection now always
+            // uses the maximum profile in supported local practice scenes.
+            var defaultResource = profile && profile.maxed ? profile.resId : variants[variants.length - 1].id;
             for (var i = 0; i < variants.length; i++) {
                 if (own(options, 'resId') ? variants[i].id === options.resId :
-                    own(options, 'color') ? variants[i].color === options.color : i === 0) { chosen = variants[i]; break; }
+                    own(options, 'color') ? variants[i].color === options.color : variants[i].id === defaultResource) { chosen = variants[i]; break; }
             }
             if (!chosen) { error = '该球杆没有所选颜色或皮肤。'; return status(); }
             restoreAll();
             selected = {cueId: cueId, color: chosen.color, resId: chosen.id};
-            armedView = currentView(); practice = options.practiceAttributes === true;
-            if (!armedView) { practice = false; message = '已记住选择；进入球桌后点击应用。'; }
-            if (ui) { ui.practice.checked = practice; }
+            selectedProfile = profile;
+            armedView = currentView();
+            if (!armedView) { message = '已记住选择；进入球桌后点击应用。'; }
             save(); refresh(); return status();
         }
         function reset() {
-            restoreAll(); armedView = null; practice = false; selected = null; error = '';
-            if (ui) { ui.practice.checked = false; }
+            restoreAll(); armedView = null; selected = null; selectedProfile = null; error = '';
             message = '已恢复原球杆和练习属性。'; save(); refresh(); return status();
         }
 
@@ -386,6 +423,7 @@
         }
         function renderResources() {
             var values = resources(config(Number(ui.select.value)));
+            var profile = maximum(Number(ui.select.value));
             while (ui.resources.firstChild) { ui.resources.removeChild(ui.resources.firstChild); }
             while (ui.color.firstChild) { ui.color.removeChild(ui.color.firstChild); }
             for (var i = 0; i < values.length; i++) {
@@ -396,9 +434,16 @@
                 color.value = String(values[i].color); color.textContent = '颜色 ' + values[i].color;
                 ui.color.appendChild(color);
             }
+            if (profile && profile.maxed) {
+                ui.resources.value = String(profile.resId);
+                for (var n = 0; n < values.length; n++) {
+                    if (values[n].id === profile.resId) { ui.color.value = String(values[n].color); break; }
+                }
+            }
             if (selected && Number(ui.select.value) === selected.cueId) {
                 ui.resources.value = String(selected.resId); ui.color.value = String(selected.color);
             }
+            ui.profile.textContent = levelSummary(profile);
         }
         function mount() {
             var doc = root.document, panel = doc && doc.getElementById('poolguide-live-controls');
@@ -419,7 +464,9 @@
             var select = field('球杆 ', 'select', 'select');
             var color = field('颜色 ', 'select', 'color');
             var resource = field('皮肤 / 特效 ', 'select', 'resources');
-            var check = field('练习属性（仅本地练习） ', 'input', 'practice'); check.type = 'checkbox';
+            var profileInfo = doc.createElement('div'); profileInfo.id = 'poolguide-cue-profile';
+            profileInfo.style.cssText = 'font-size:11px;color:#b3cdc9;margin:6px 0;';
+            section.appendChild(profileInfo);
             function button(text, suffix) {
                 var element = doc.createElement('button'); element.type = 'button'; element.id = 'poolguide-cue-' + suffix;
                 element.textContent = text; element.style.cssText = 'font:inherit;color:#0b1b22;background:#68e8c9;border:0;border-radius:4px;padding:8px;margin:3px;min-height:36px;';
@@ -431,7 +478,7 @@
             feedback.setAttribute('aria-live', 'polite'); feedback.style.cssText = 'font-size:11px;color:#b3cdc9;margin-top:6px;';
             section.appendChild(feedback); panel.appendChild(expand); panel.appendChild(section);
             ui = {expand: expand, section: section, search: search, select: select, color: color,
-                resources: resource, practice: check, previous: previous, more: more, message: feedback, offset: 0};
+                resources: resource, profile: profileInfo, previous: previous, more: more, message: feedback, offset: 0};
             search.value = selected ? String(selected.cueId) : '';
             expand.addEventListener('click', function (event) {
                 event.stopPropagation(); var opened = section.style.display === 'none';
@@ -451,14 +498,14 @@
             more.addEventListener('click', function (event) { event.stopPropagation(); ui.offset += 20; renderList(false); });
             previous.addEventListener('click', function (event) { event.stopPropagation(); ui.offset = Math.max(0, ui.offset - 20); renderList(false); });
             apply.addEventListener('click', function (event) {
-                event.stopPropagation(); configure({cueId: Number(select.value), resId: Number(resource.value), practiceAttributes: check.checked === true}); refresh();
+                event.stopPropagation(); configure({cueId: Number(select.value), resId: Number(resource.value)}); refresh();
             });
             restore.addEventListener('click', function (event) { event.stopPropagation(); reset(); });
             renderList(false);
         }
         function dispose() {
             if (disposed) { return; }
-            restoreAll(); armedView = null; practice = false; disposed = true;
+            restoreAll(); armedView = null; disposed = true;
             if (state.controls) {
                 if (state.controls.refresh === wrappedRefresh) { state.controls.refresh = oldRefresh; }
                 if (state.controls.dispose === wrappedDispose) { state.controls.dispose = oldDispose; }

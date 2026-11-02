@@ -1,12 +1,12 @@
 {
   "date": "2026-11-02",
   "branch": "noroot",
-  "release_tag": "noroot-3.2.1-pg3",
-  "apk": "PoolGame-NoRoot-Coexist-3.2.1-pg3.apk",
-  "apk_sha256": "95a8a2d6cfd908fa64fe8dda5fcb49ba80d00f065d19c15929ab70bf999bc4bd",
-  "apk_bytes": 178415499,
+  "release_tag": "noroot-3.2.1-pg4",
+  "apk": "PoolGame-NoRoot-Coexist-3.2.1-pg4.apk",
+  "apk_sha256": "e70d2cae62a9bd76b50b69dc8e9c7ba23442394ec2ce88fb117153e1d983e5e1",
+  "apk_bytes": 178419595,
   "module": "noroot-game/local_cues.js",
-  "module_sha256": "012139a929ddcc2a8e22d5898f969938b9d4260527e12c0c5727aac2f9b365d5",
+  "module_sha256": "86708b531c3be721046a0d164d3a3f7310dd32135febacb513d05e1e86f8b9e8",
   "game_source_sha256": "548d726727ab070df4b447a837a88e606d8b61d43a41692fec22682c73cd833a",
   "practice_classes": [
     "PoolLianXiView",
@@ -17,11 +17,6 @@
     "RulesSnkLianXi"
   ],
   "offline_checks": {
-    "local_cue_node_tests": {
-      "passed": 21,
-      "skipped": 0,
-      "real_game_class_definitions_evaluated": 5
-    },
     "embedded_payload_tests": {
       "passed": 8
     },
@@ -40,7 +35,13 @@
     "javascript_syntax": "passed",
     "apk_member_comparison": "passed",
     "signature_and_zip_alignment": "passed",
-    "assembled_injection_and_channel_identity": "passed"
+    "assembled_injection_and_channel_identity": "passed",
+    "local_cue_and_max_level_node_tests": {
+      "passed": 36,
+      "skipped": 0,
+      "actual_athena_config_verified": true,
+      "real_game_class_definitions_evaluated": 5
+    }
   },
   "guard_coverage": [
     "network_and_spectator_stats_unchanged",
@@ -49,18 +50,121 @@
     "later_legitimate_equipment_updates_preserved",
     "pull_power_angle_and_english_preserved",
     "synchronous_resource_failures_roll_back",
-    "checkbox_draft_survives_refresh",
-    "paged_search_and_account_scoped_selection"
+    "paged_search_and_account_scoped_selection",
+    "automatic_max_attributes_without_checkbox",
+    "athena_pinned_and_particle_only_resources_supported",
+    "legacy_options_cannot_disable_default_attributes",
+    "same_cue_visual_fallback_only",
+    "level_star_quality_terminal_ranks_with_duplicate_conflict_checks"
   ],
   "feature_sends_equipment_requests": false,
   "modifies_server_owned_bag": false,
   "selection_auto_applies_after_relaunch": false,
-  "practice_enable_persisted": false,
   "device_runtime_verified": false,
   "asynchronous_assets_runtime_verified": false,
   "limitations": [
-    "Actual Android login, downloaded assets, manual practice and scene transitions require device verification.",
-    "Texture and movie-clip loading still use the original game loader; synchronous module errors are handled locally.",
-    "No server-side unlock or account ownership is granted."
-  ]
+    "Actual Android login, downloaded assets and manual practice still require runtime verification.",
+    "Only configured level/star/quality endpoints are simulated locally; server bonuses, legacy talents and account inventory are unchanged.",
+    "Two obsolete cues (90007/90008) have no valid drawable resource in the inspected configuration and are not marked maxed."
+  ],
+  "build": "pg4",
+  "level_module": "noroot-game/cue_levels.js",
+  "level_module_sha256": "d9d8287f299cd4c3a3427dccbfc6094fca45e612ef745c4b8c80e6803e2bb334",
+  "default_practice_attributes": true,
+  "practice_checkbox_present": false,
+  "pinned_cue": {
+    "id": 90613,
+    "name": "雅典娜"
+  },
+  "max_level_dimensions": [
+    "level",
+    "star",
+    "quality"
+  ],
+  "level_formula": "floor(base * (100 + star_rate) / 100) + cumulative_level_up",
+  "real_config_audit": {
+    "config_sha256": "50c936a1d0069e61e38cfd326b208b1b0e1623ed7cbad700b87fb10483038ce5",
+    "total": 338,
+    "supported": 336,
+    "unsupported": [
+      {
+        "cueId": 90007,
+        "reason": "最高品质的本杆皮肤资源不可用。"
+      },
+      {
+        "cueId": 90008,
+        "reason": "最高品质的本杆皮肤资源不可用。"
+      }
+    ],
+    "athena": {
+      "cueId": 90613,
+      "name": "雅典娜",
+      "supported": true,
+      "maxed": true,
+      "reason": "按等级、星级和最高突破配置计算；不含服务器活动或旧天赋加成。",
+      "dimensions": {
+        "level": true,
+        "star": true,
+        "quality": true,
+        "nativeVisual": true,
+        "legacyTalent": false,
+        "serverBonuses": false
+      },
+      "group": 60000,
+      "force": 1263,
+      "line": 1321,
+      "spin": 1332,
+      "time": 208,
+      "color": 14,
+      "level": 1,
+      "levelId": 500301,
+      "levelShow": 1,
+      "star": 0,
+      "starId": 900410,
+      "resId": 901117,
+      "resourceColor": 14,
+      "resourceFallback": false,
+      "hasParticle": true,
+      "buffs": [
+        {
+          "id": 101,
+          "value": 12
+        },
+        {
+          "id": 103,
+          "value": 5
+        },
+        {
+          "id": 110,
+          "value": 5
+        }
+      ]
+    },
+    "formula_examples": [
+      {
+        "cueId": 90002,
+        "name": "青花瓷",
+        "force": 806,
+        "line": 639,
+        "spin": 619,
+        "time": 150,
+        "level": 140,
+        "star": 3,
+        "color": 5
+      },
+      {
+        "cueId": 90121,
+        "name": "骑枪",
+        "force": 1121,
+        "line": 1139,
+        "spin": 1118,
+        "time": 182,
+        "level": 260,
+        "star": 3,
+        "color": 11
+      }
+    ]
+  },
+  "time_rule_changed": false,
+  "server_or_legacy_talent_bonuses_applied": false
 }

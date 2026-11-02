@@ -49,6 +49,7 @@ def build_payload(settings: dict | None = None, package_name: str = DEFAULT_PACK
         1,
     )
     ui = (ROOT / "settings_ui.js").read_text(encoding="utf-8")
+    cue_levels = (ROOT / "cue_levels.js").read_text(encoding="utf-8")
     local_cues = (ROOT / "local_cues.js").read_text(encoding="utf-8")
     defaults = json.dumps(normalized, ensure_ascii=True, separators=(",", ":"))
     prefix = """/* Pool Guide embedded loader: ES5, local game documents only. */
@@ -67,7 +68,7 @@ def build_payload(settings: dict | None = None, package_name: str = DEFAULT_PACK
 """
     # Validation excludes JavaScript syntax; escaped dots cannot become regex wildcards.
     prefix = prefix.replace("__POOL_GUIDE_PACKAGE_PATTERN__", package_name.replace(".", r"\."), 1)
-    return prefix + ui + "\n" + local_cues + "\n    var defaults = " + defaults + ";\n" + """
+    return prefix + ui + "\n" + cue_levels + "\n" + local_cues + "\n    var defaults = " + defaults + ";\n" + """
     function install() {
         record.timer = null;
         if (record.phase !== 'waiting') { return; }
