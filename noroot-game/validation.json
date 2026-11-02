@@ -1,0 +1,53 @@
+{
+  "apk": "noroot-game/.work/PoolGame-NoRoot-3.2.1-pg3-base.apk",
+  "package": "com.krmtqds.aligames",
+  "version": "3.2.1",
+  "build": "pg3",
+  "bytes": 178444171,
+  "sha256": "ba54f840f23f779ca40475fba5fe1a2a73feb9ea0e12cbaa480cce7ae261673e",
+  "original_sha256": "e677e9529351bc558d010d4ae5bd173a555a8fba811deb75174065fc5f938214",
+  "apktool_sha256": "66cf4524a4a45a7f56567d08b2c9b6ec237bcdd78cee69fd4a59c8a0243aeafa",
+  "payload_bytes": 99751,
+  "payload_sha256": "16ab44c38b9982a41ad4935da0707cf0301cf98ad84603e29aa59ac20fc290e2",
+  "callback_source_sha256": "3943e3d66ecf2770fc85a058db53047096af45d98701fe61886bb39f258d23e3",
+  "zip_verification": {
+    "unchanged_original_entries": 3762,
+    "changed_entries": [
+      "classes2.dex"
+    ],
+    "added_entries": [
+      "assets/poolguide/loader.js",
+      "classes5.dex"
+    ],
+    "manifest_and_permissions": "byte-for-byte identical to original"
+  },
+  "signature_verification": "Verifies\nVerified using v1 scheme (JAR signing): false\nVerified using v2 scheme (APK Signature Scheme v2): true\nVerified using v3 scheme (APK Signature Scheme v3): true\nVerified using v3.1 scheme (APK Signature Scheme v3.1): false\nVerified using v4 scheme (APK Signature Scheme v4): false\nVerified for SourceStamp: false\nNumber of signers: 1\nSigner #1 certificate DN: CN=Pool Game Embedded Local Build, O=Local Development, C=CN\nSigner #1 certificate SHA-256 digest: 6e13c19eb0f485732b7ab1f65534536fd6e30a684cf2c98bc888e66e06990b42\nSigner #1 certificate SHA-1 digest: d28127bc2ee5e8fb13d11b3fe8aa194f74a1fa54\nSigner #1 certificate MD5 digest: d65d010cc68db9e6d73d27ef6ddea56f\nSigner #1 key algorithm: RSA\nSigner #1 key size (bits): 2048\nSigner #1 public key SHA-256 digest: dc0f32a80c93c1121a60a3781a0cc6d34b30d1edb994b1acee3c74da92f54add\nSigner #1 public key SHA-1 digest: d3f9c3a3366f136ce8e12fb247d3b60bb0ca1b3e\nSigner #1 public key MD5 digest: 1af4297a5b8b2f4ccffec9bdcb222eeb",
+  "root_required": false,
+  "shizuku_required": false,
+  "device_runtime_verified": false,
+  "runtime_unknowns": [
+    "installation on an unrooted phone",
+    "channel SDK login after resigning",
+    "live table physics and rendering",
+    "local cue appearance and practice attributes on a physical phone",
+    "server acceptance of pocket changes",
+    "compatibility with downloaded game updates"
+  ],
+  "final_package_verification": {
+    "apk_sha256": "ba54f840f23f779ca40475fba5fe1a2a73feb9ea0e12cbaa480cce7ae261673e",
+    "zip_entries": {
+      "unchanged_original_entries": 3762,
+      "changed_entries": [
+        "classes2.dex"
+      ],
+      "added_entries": [
+        "assets/poolguide/loader.js",
+        "classes5.dex"
+      ],
+      "manifest_and_permissions": "byte-for-byte identical to original"
+    },
+    "signature_and_alignment": "passed",
+    "assembled_callback_and_injector": "passed",
+    "device_runtime_verified": false
+  }
+}

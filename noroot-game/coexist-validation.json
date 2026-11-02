@@ -1,0 +1,277 @@
+{
+  "apk": "PoolGame-NoRoot-Coexist-3.2.1-pg3.apk",
+  "bytes": 178415499,
+  "sha256": "95a8a2d6cfd908fa64fe8dda5fcb49ba80d00f065d19c15929ab70bf999bc4bd",
+  "base_sha256": "ba54f840f23f779ca40475fba5fe1a2a73feb9ea0e12cbaa480cce7ae261673e",
+  "original_sha256": "e677e9529351bc558d010d4ae5bd173a555a8fba811deb75174065fc5f938214",
+  "package": "io.lizuping.poolguide.game",
+  "label": "台球大师·测试",
+  "version": "3.2.1",
+  "build": "pg3",
+  "build_date": "2026-11-02",
+  "manifest_changes": {
+    "old_package": "com.krmtqds.aligames",
+    "new_package": "io.lizuping.poolguide.game",
+    "label": "台球大师·测试",
+    "changed_attributes": [
+      {
+        "tag": "manifest",
+        "attribute": "package",
+        "old": "com.krmtqds.aligames",
+        "new": "io.lizuping.poolguide.game"
+      },
+      {
+        "tag": "application",
+        "attribute": "label",
+        "old": {
+          "type": 1,
+          "data": 2131558428
+        },
+        "new": "台球大师·测试"
+      },
+      {
+        "tag": "activity",
+        "attribute": "label",
+        "old": {
+          "type": 1,
+          "data": 2131558471
+        },
+        "new": "台球大师·测试"
+      },
+      {
+        "tag": "intent-filter",
+        "attribute": "label",
+        "old": {
+          "type": 1,
+          "data": 2131558471
+        },
+        "new": "台球大师·测试"
+      },
+      {
+        "tag": "intent-filter",
+        "attribute": "label",
+        "old": {
+          "type": 1,
+          "data": 2131558471
+        },
+        "new": "台球大师·测试"
+      },
+      {
+        "tag": "activity",
+        "attribute": "label",
+        "old": {
+          "type": 1,
+          "data": 2131558471
+        },
+        "new": "台球大师·测试"
+      },
+      {
+        "tag": "activity",
+        "attribute": "label",
+        "old": {
+          "type": 1,
+          "data": 2131558427
+        },
+        "new": "台球大师·测试"
+      },
+      {
+        "tag": "uses-permission",
+        "attribute": "name",
+        "old": "com.krmtqds.aligames.openadsdk.permission.TT_PANGOLIN",
+        "new": "io.lizuping.poolguide.game.openadsdk.permission.TT_PANGOLIN"
+      },
+      {
+        "tag": "permission",
+        "attribute": "name",
+        "old": "com.krmtqds.aligames.openadsdk.permission.TT_PANGOLIN",
+        "new": "io.lizuping.poolguide.game.openadsdk.permission.TT_PANGOLIN"
+      },
+      {
+        "tag": "provider",
+        "attribute": "authorities",
+        "old": "com.krmtqds.aligames.fileprovider",
+        "new": "io.lizuping.poolguide.game.fileprovider"
+      },
+      {
+        "tag": "provider",
+        "attribute": "authorities",
+        "old": "com.krmtqds.aligames.apkupdateProvider",
+        "new": "io.lizuping.poolguide.game.apkupdateProvider"
+      },
+      {
+        "tag": "provider",
+        "attribute": "authorities",
+        "old": "com.krmtqds.aligames.adFileProvider",
+        "new": "io.lizuping.poolguide.game.adFileProvider"
+      },
+      {
+        "tag": "provider",
+        "attribute": "authorities",
+        "old": "com.krmtqds.aligames.NGAdContentProvider",
+        "new": "io.lizuping.poolguide.game.NGAdContentProvider"
+      },
+      {
+        "tag": "provider",
+        "attribute": "authorities",
+        "old": "com.krmtqds.aligames.TTFileProvider",
+        "new": "io.lizuping.poolguide.game.TTFileProvider"
+      },
+      {
+        "tag": "provider",
+        "attribute": "authorities",
+        "old": "com.krmtqds.aligames.TTMultiProvider",
+        "new": "io.lizuping.poolguide.game.TTMultiProvider"
+      },
+      {
+        "tag": "provider",
+        "attribute": "authorities",
+        "old": "com.krmtqds.aligames.gdt.fileprovider",
+        "new": "io.lizuping.poolguide.game.gdt.fileprovider"
+      },
+      {
+        "tag": "provider",
+        "attribute": "authorities",
+        "old": "com.krmtqds.aligames.pangle.servermanager.downloader.com.bytedance.sdk.openadsdk.adhost",
+        "new": "io.lizuping.poolguide.game.pangle.servermanager.downloader.com.bytedance.sdk.openadsdk.adhost"
+      },
+      {
+        "tag": "provider",
+        "attribute": "authorities",
+        "old": "com.krmtqds.aligames.pangle.servermanager.main",
+        "new": "io.lizuping.poolguide.game.pangle.servermanager.main"
+      },
+      {
+        "tag": "provider",
+        "attribute": "authorities",
+        "old": "com.krmtqds.aligames.pangle.provider.proxy.main",
+        "new": "io.lizuping.poolguide.game.pangle.provider.proxy.main"
+      },
+      {
+        "tag": "provider",
+        "attribute": "authorities",
+        "old": "com.krmtqds.aligames.pangle.fileprovider",
+        "new": "io.lizuping.poolguide.game.pangle.fileprovider"
+      },
+      {
+        "tag": "provider",
+        "attribute": "authorities",
+        "old": "com.krmtqds.aligames.bytedance.android.openliveplugin.process.server.LiveServerManager",
+        "new": "io.lizuping.poolguide.game.bytedance.android.openliveplugin.process.server.LiveServerManager"
+      },
+      {
+        "tag": "provider",
+        "attribute": "authorities",
+        "old": "com.krmtqds.aligames.pangle.servermanager.bytelive.com.byted.live.lite",
+        "new": "io.lizuping.poolguide.game.pangle.servermanager.bytelive.com.byted.live.lite"
+      },
+      {
+        "tag": "provider",
+        "attribute": "authorities",
+        "old": "com.krmtqds.aligames.pangle.servermanager.push.com.byted.live.lite",
+        "new": "io.lizuping.poolguide.game.pangle.servermanager.push.com.byted.live.lite"
+      },
+      {
+        "tag": "provider",
+        "attribute": "authorities",
+        "old": "com.krmtqds.aligames.pangle.servermanager.downloader.com.byted.live.lite",
+        "new": "io.lizuping.poolguide.game.pangle.servermanager.downloader.com.byted.live.lite"
+      },
+      {
+        "tag": "activity",
+        "attribute": "taskAffinity",
+        "old": "com.krmtqds.aligames.diff",
+        "new": "io.lizuping.poolguide.game.diff"
+      },
+      {
+        "tag": "provider",
+        "attribute": "authorities",
+        "old": "com.krmtqds.aligames.gamesdk.fileprovider",
+        "new": "io.lizuping.poolguide.game.gamesdk.fileprovider"
+      }
+    ],
+    "appended_strings": 20,
+    "original_strings_preserved": true,
+    "component_classes_preserved": true,
+    "sdk_metadata_preserved": true,
+    "provider_authorities": [
+      "io.lizuping.poolguide.game.fileprovider",
+      "io.lizuping.poolguide.game.apkupdateProvider",
+      "io.lizuping.poolguide.game.adFileProvider",
+      "io.lizuping.poolguide.game.NGAdContentProvider",
+      "io.lizuping.poolguide.game.TTFileProvider",
+      "io.lizuping.poolguide.game.TTMultiProvider",
+      "io.lizuping.poolguide.game.gdt.fileprovider",
+      "io.lizuping.poolguide.game.pangle.servermanager.downloader.com.bytedance.sdk.openadsdk.adhost",
+      "io.lizuping.poolguide.game.pangle.servermanager.main",
+      "io.lizuping.poolguide.game.pangle.provider.proxy.main",
+      "io.lizuping.poolguide.game.pangle.fileprovider",
+      "io.lizuping.poolguide.game.bytedance.android.openliveplugin.process.server.LiveServerManager",
+      "io.lizuping.poolguide.game.pangle.servermanager.bytelive.com.byted.live.lite",
+      "io.lizuping.poolguide.game.pangle.servermanager.push.com.byted.live.lite",
+      "io.lizuping.poolguide.game.pangle.servermanager.downloader.com.byted.live.lite",
+      "io.lizuping.poolguide.game.gamesdk.fileprovider"
+    ],
+    "provider_authorities_disjoint": true,
+    "permission_declarations": [
+      {
+        "tag": "permission",
+        "name": "io.lizuping.poolguide.game.openadsdk.permission.TT_PANGOLIN"
+      }
+    ],
+    "launchers": [
+      {
+        "tag": "activity",
+        "name": "com.cnandroid.ball8game.LaunchActivity",
+        "label": "台球大师·测试",
+        "launcher": true
+      }
+    ]
+  },
+  "resource_changes": {
+    "packages": [
+      {
+        "chunk_offset": 103040,
+        "package_id": 127,
+        "name_field_offset": 103052,
+        "old_name": "com.krmtqds.aligames",
+        "new_name": "io.lizuping.poolguide.game"
+      }
+    ],
+    "resource_ids_preserved": true,
+    "all_other_bytes_preserved": true,
+    "bytes": 435168
+  },
+  "js_channel_identity": "com.krmtqds.aligames",
+  "payload_sha256": "33102f8ad3f73c56f64b25fbe9c871ee6ee280323e1d957c413c60917d02b8a3",
+  "fixes": {
+    "unzip_progress_poll_interval_ms": 100,
+    "java_heap_limit_changed": false
+  },
+  "offline_verification": {
+    "apk_sha256": "95a8a2d6cfd908fa64fe8dda5fcb49ba80d00f065d19c15929ab70bf999bc4bd",
+    "package": "io.lizuping.poolguide.game",
+    "label": "台球大师·测试",
+    "changed_entries_from_base": [
+      "AndroidManifest.xml",
+      "assets/poolguide/loader.js",
+      "classes.dex",
+      "resources.arsc"
+    ],
+    "unchanged_base_entries": 3761,
+    "aapt_package_and_label": "passed",
+    "signature_and_alignment": "passed",
+    "assembled_channel_identity": "passed",
+    "extraction_progress_interval_ms": 100,
+    "device_runtime_verified": false
+  },
+  "root_required": false,
+  "shizuku_required": false,
+  "device_runtime_verified": false,
+  "runtime_unknowns": [
+    "side-by-side installation on a physical phone",
+    "channel SDK login under new package/signature",
+    "live game rendering and physics",
+    "local cue appearance and practice attributes on a physical phone",
+    "server acceptance of pocket changes"
+  ]
+}

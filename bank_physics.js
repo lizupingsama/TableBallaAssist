@@ -3,26 +3,15 @@
     'use strict';
     var CACHE = '__poolGuidePhysicsPreview';
     var DT = .01;
-    var MAX_STEPS = 2000;
-    var CPU_LIMIT_MS = 35;
+    // Bound simulated time, not wall time: CPU load must never change a shot's endpoint.
+    var MAX_STEPS = 12000;
 
     function available() {
         return !!(root.TableTest && root.Table && typeof root.Table.calculateShot === 'function' &&
             root.PoolMath && typeof root.PoolMath.tableBallFriction === 'function');
     }
     function inputs(guide, angle) {
-        var visualCue = guide.visualCue;
-        var canvas = visualCue && visualCue.cueCanvas;
-        var english = canvas && canvas.englishControl;
-        var max = Number(root.PoolMath.CUE_PROPERTIES_MAX_POWER) || 350;
-        var power = Number(visualCue ? visualCue.power : guide.power);
-        var estimated = !isFinite(power) || power <= 0;
-        if (estimated) { power = max; }
-        var x = english ? Number(english.englishX) : 0;
-        var y = english ? Number(english.englishY) : 0;
-        return {angle: angle, power: Math.max(.01, Math.min(max, power)), maxPower: max,
-            mode: estimated ? 'full-power-preview' : 'current-power',
-            englishX: isFinite(x) ? x : 0, englishY: isFinite(y) ? y : 0, estimated: estimated};
+        return root.__poolGuideReadShotInputs(guide, angle);
     }
     function signature(guide, shot, settings) {
         var balls = guide.m_cTable.m_cBalls;
@@ -163,6 +152,7 @@
         var cueIndex = table.m_cBalls.indexOf(cue);
         if (cueIndex < 0 || !table.m_cTableShape || !table.m_cTableCollisionBounds) { return null; }
         var shot = inputs(guide, angle);
+        var shotKey = JSON.stringify(shot);
         var key = signature(guide, shot, settings);
         var options = [settings.firstHitPocket, settings.snookerAllReds, settings.eightBallAllButBlack].join('|');
         var cache = guide[CACHE];
@@ -170,7 +160,7 @@
             if (cache && cache.sim.dispose) { cache.sim.dispose(); }
             cache = guide[CACHE] = {table: table, sim: simulator(table), at: 0};
         }
-        if (cache.plan && (cache.key === key || (!force && cache.count === settings.bankCount &&
+        if (cache.plan && cache.shotKey === shotKey && (cache.key === key || (!force && cache.count === settings.bankCount &&
             cache.options === options && Date.now() - cache.at < 60))) {
             return copyPlan(cache.plan);
         }
@@ -198,10 +188,18 @@
                     if (roles[i] && roles[i].active && !onTable(roles[i].ball)) {
                         roles[i].active = false;
                         plan.pocketStops++;
+                    } else if (roles[i] && roles[i].active) {
+                        var tracked = roles[i].ball;
+                        // Pure side spin cannot restart translation. A later ball hit
+                        // ends this path at the same point; keep horizontal spin for draw/follow.
+                        if (tracked.velocity.x === 0 && tracked.velocity.y === 0 &&
+                            tracked.spin.x === 0 && tracked.spin.y === 0) {
+                            roles[i].active = false;
+                        }
                     }
                 }
                 if (!moving || (!data.cue.active && (!data.target || !data.target.active))) { break; }
-                if (step === MAX_STEPS - 1 || (step % 20 === 0 && Date.now() - started > CPU_LIMIT_MS)) {
+                if (step === MAX_STEPS - 1) {
                     plan.truncated = true;
                     break;
                 }
@@ -212,6 +210,7 @@
             plan.targetBanks = data.target ? data.target.banks : 0;
             plan.elapsedMs = Date.now() - started;
             cache.key = key;
+            cache.shotKey = shotKey;
             cache.count = settings.bankCount;
             cache.options = options;
             cache.at = Date.now();

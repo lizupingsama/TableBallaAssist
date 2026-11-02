@@ -1,0 +1,66 @@
+{
+  "date": "2026-11-02",
+  "branch": "noroot",
+  "release_tag": "noroot-3.2.1-pg3",
+  "apk": "PoolGame-NoRoot-Coexist-3.2.1-pg3.apk",
+  "apk_sha256": "95a8a2d6cfd908fa64fe8dda5fcb49ba80d00f065d19c15929ab70bf999bc4bd",
+  "apk_bytes": 178415499,
+  "module": "noroot-game/local_cues.js",
+  "module_sha256": "012139a929ddcc2a8e22d5898f969938b9d4260527e12c0c5727aac2f9b365d5",
+  "game_source_sha256": "548d726727ab070df4b447a837a88e606d8b61d43a41692fec22682c73cd833a",
+  "practice_classes": [
+    "PoolLianXiView",
+    "SnkLianXiGameView"
+  ],
+  "practice_rules": [
+    "Rules8BallDanRenLianXi",
+    "RulesSnkLianXi"
+  ],
+  "offline_checks": {
+    "local_cue_node_tests": {
+      "passed": 21,
+      "skipped": 0,
+      "real_game_class_definitions_evaluated": 5
+    },
+    "embedded_payload_tests": {
+      "passed": 8
+    },
+    "existing_physics_and_controls_node_tests": {
+      "passed": 80
+    },
+    "patcher_python_tests": {
+      "passed": 10
+    },
+    "injector_jvm_checks": {
+      "passed": 59
+    },
+    "clone_identity_python_tests": {
+      "passed": 7
+    },
+    "javascript_syntax": "passed",
+    "apk_member_comparison": "passed",
+    "signature_and_zip_alignment": "passed",
+    "assembled_injection_and_channel_identity": "passed"
+  },
+  "guard_coverage": [
+    "network_and_spectator_stats_unchanged",
+    "parallel_preview_rejects_shared_physics",
+    "account_change_and_scene_exit_restore",
+    "later_legitimate_equipment_updates_preserved",
+    "pull_power_angle_and_english_preserved",
+    "synchronous_resource_failures_roll_back",
+    "checkbox_draft_survives_refresh",
+    "paged_search_and_account_scoped_selection"
+  ],
+  "feature_sends_equipment_requests": false,
+  "modifies_server_owned_bag": false,
+  "selection_auto_applies_after_relaunch": false,
+  "practice_enable_persisted": false,
+  "device_runtime_verified": false,
+  "asynchronous_assets_runtime_verified": false,
+  "limitations": [
+    "Actual Android login, downloaded assets, manual practice and scene transitions require device verification.",
+    "Texture and movie-clip loading still use the original game loader; synchronous module errors are handled locally.",
+    "No server-side unlock or account ownership is granted."
+  ]
+}

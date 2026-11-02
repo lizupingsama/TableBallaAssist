@@ -78,7 +78,7 @@ test('polling changes the full-power idle hint to actual pull power and refreshe
     tick();
     assert.match(f.panel.children[1].textContent, /未拉杆：100% 满力预览/);
     f.guide.visualCue.power = 220;
-    f.guide.visualCue.cueCanvas.englishControl.englishX = .4;
+    f.guide._gameView.poolCanvas.englishControl.englishX = .4;
     f.s.__poolGuidePhysics.invalidate(f.guide);
     tick();
     assert.match(f.panel.children[1].textContent, /当前力度/);

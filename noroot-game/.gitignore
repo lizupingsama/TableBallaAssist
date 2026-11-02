@@ -1,0 +1,6 @@
+.tools/
+.work/
+.signing/
+__pycache__/
+*.apk
+*.idsig

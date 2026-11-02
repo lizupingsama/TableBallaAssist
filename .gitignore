@@ -4,6 +4,16 @@
 __pycache__/
 *.log
 node_modules/
+.desktop/
+*.apk
+*.idsig
+.signing/
+.tools/
+.work/
+*.p12
+*.jks
+*.keystore
+/noroot-game/coexist-validation-pg1.json
 
 # Left over from the retired Frida experiment; unused by the root edition.
 /package-lock.json

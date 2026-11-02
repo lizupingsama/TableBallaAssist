@@ -68,6 +68,11 @@
     if (request.action === 'status') { return status(previous); }
     if (request.action === 'restore') {
         if (previous) {
+            if (root.__poolGuideRemote) {
+                root.__poolGuideRemote.disposeAll();
+                delete root.__poolGuideRemote;
+                delete root.__poolGuideRemoteConfig;
+            }
             if (previous.controls) { previous.controls.dispose(); }
             var overlays = (previous.overlays || []).slice();
             for (var o = 0; o < overlays.length; o++) {
@@ -327,6 +332,7 @@
             shape.graphics.clear();
             if (shape.parent) { shape.parent.removeChild(shape); }
             if (root.__poolGuidePhysics) { root.__poolGuidePhysics.dispose(guide); }
+            if (root.__poolGuideRemote) { root.__poolGuideRemote.dispose(guide); }
             state.overlays = state.overlays.filter(function (item) { return item !== entry; });
         }};
         state.overlays.push(entry);
@@ -420,6 +426,9 @@
         var table = guide.m_cTable;
         var cue = typeof guide.getCueBall === 'function' ? guide.getCueBall() : table && table.cueBall;
         if (!table || !cue) { return null; }
+        if (root.__poolGuideRemote) {
+            return root.__poolGuideRemote.predict(guide, angle, state.settings, badFirstContact, split);
+        }
         if (root.__poolGuidePhysics) {
             try {
                 var simulated = root.__poolGuidePhysics.predict(guide, angle, state.settings, badFirstContact, split);

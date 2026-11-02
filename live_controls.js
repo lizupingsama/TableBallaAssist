@@ -141,6 +141,15 @@
                     !root.__poolGuidePhysics || !root.__poolGuidePhysics.available() ?
                     '物理试算暂不可用，显示方向近似' : '未拉杆按满力预览，拉杆后跟随实际力度';
             }
+            if (state.settings.bankPrediction && root.__poolGuideRemote) {
+                var remote = root.__poolGuideRemote.stats;
+                hint.textContent = remote.connected ?
+                    (remote.rttMs === null ? '电脑已连接 · 等待预测' : '电脑计算 · 往返 ' + remote.rttMs + ' ms') +
+                    (plan && plan.shot ? (plan.shot.estimated ? ' · 满力预览' :
+                        ' · 当前力度 ' + Math.round(plan.shot.power / plan.shot.maxPower * 100) + '%') : '') +
+                    (plan && plan.truncated ? ' · 轨迹已截断' : '') : '电脑未连接 · 自动重连中';
+                if (remote.error) { hint.textContent += ' · ' + remote.error; }
+            }
             for (var p = 0; p < pocketButtons.length; p++) {
                 var option = pocketButtons[p];
                 var enabled = state.settings[option.key] === true;
@@ -182,9 +191,10 @@
         }
         try {
             var saved = Number(root.localStorage.getItem(COUNT_KEY));
-            if (saved >= 1 && saved <= 6 && Math.floor(saved) === saved) {
+            if (!root.__poolGuideRemoteConfig && saved >= 1 && saved <= 6 && Math.floor(saved) === saved) {
                 state.configureBanks(state.settings.bankPrediction, saved);
             }
+            if (root.__poolGuideRemoteConfig) { root.localStorage.setItem(COUNT_KEY, String(state.settings.bankCount)); }
         } catch (ignored) {}
         try { setHidden(root.localStorage.getItem(HIDDEN_KEY) === 'true'); } catch (ignored) {}
         var timer = root.setInterval(function () {
@@ -198,7 +208,7 @@
                     }
                 }
             }
-            refresh();
+            if (state.controls) { state.controls.refresh(); }
         }, 200);
         function dispose() {
             root.clearInterval(timer);

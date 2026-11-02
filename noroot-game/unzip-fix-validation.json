@@ -1,0 +1,46 @@
+{
+  "date": "2026-11-02",
+  "device": "REDMI K90",
+  "apk": "PoolGame-NoRoot-Coexist-3.2.1-pg2.apk",
+  "apk_sha256": "64027dd63ab6a0dd9b87c9a83a9a8111f94d121d36c0c2cb92f67e3e9c7eafc1",
+  "root_used": false,
+  "installation": "Success; updated existing coexist app without clearing data",
+  "cause_evidence": {
+    "crashes": "OutOfMemoryError at 268435456-byte growth limit; main and ZIP worker threads",
+    "source": "File-based ZipUtils.uncompress polled with Thread.sleep(0), invoking a new UI progress Runnable every iteration",
+    "retained_object_heap_dump_obtained": false
+  },
+  "fix": {
+    "production_method": "com.cnandroid.ZipUtils.uncompress(File,String,String,ZipCallback)",
+    "progress_interval_ms": 100,
+    "heap_limit_increased": false
+  },
+  "app_observation": {
+    "pid": 31235,
+    "samples": 7,
+    "heap_allocated_kb_min": 26239,
+    "heap_allocated_kb_max": 26644,
+    "reached": "Ninegame PassportAccountActivity after resource downloading",
+    "same_game_pid_through_observation": true,
+    "all_scenarios_or_gameplay_verified": false
+  },
+  "production_method_probe": {
+    "uid": 2000,
+    "apk_sha256": "64027dd63ab6a0dd9b87c9a83a9a8111f94d121d36c0c2cb92f67e3e9c7eafc1",
+    "files": 4112,
+    "uncompressed_bytes": 35651584,
+    "extraction_ms": 797.452395,
+    "progress_calls": 7,
+    "min_interval_ms": 100.105313,
+    "max_interval_ms": 100.228021,
+    "all_sizes_and_sha256_verified": true,
+    "success_callbacks": 1,
+    "invalid_zip_failure_callbacks": 1,
+    "passed": true
+  },
+  "remaining_scope": [
+    "channel login and live gameplay need user login",
+    "device disconnected after observation; final crash-buffer check unavailable"
+  ],
+  "qa_temp_cleanup_pending": "/data/local/tmp/poolguide-unzip-probe-pg2 (probe.dex and game.apk only; generated test cases cleaned)"
+}

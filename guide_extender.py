@@ -14,6 +14,7 @@ import sys
 import tempfile
 import threading
 import uuid
+from urllib.parse import urlsplit
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
@@ -57,11 +58,30 @@ def validate_settings(settings: dict) -> dict:
     factor = float(settings.get("factor", 6))
     if mode not in ("fixed", "multiply") or not math.isfinite(length) or not 10 <= length <= 1500 or not math.isfinite(factor) or not 1 <= factor <= 30:
         raise ToolError("固定长度需为 10–1500，倍数需为 1–30。")
-    return {"mode": mode, "length": length, "factor": factor, "showSplit": bool(settings.get("showSplit", True)),
+    result = {"mode": mode, "length": length, "factor": factor, "showSplit": bool(settings.get("showSplit", True)),
             "bankPrediction": bool(settings.get("bankPrediction", False)),
             "firstHitPocket": bool(settings.get("firstHitPocket", False)),
             "snookerAllReds": bool(settings.get("snookerAllReds", False)),
             "eightBallAllButBlack": bool(settings.get("eightBallAllButBlack", False))}
+    if "bankCount" in settings:
+        count = settings["bankCount"]
+        if isinstance(count, bool) or not isinstance(count, (int, float)) or not 1 <= count <= 6 or int(count) != count:
+            raise ToolError("反弹次数需为 1–6 的整数。")
+        result["bankCount"] = int(count)
+    remote = settings.get("remote")
+    if remote is not None:
+        if not isinstance(remote, dict):
+            raise ToolError("电脑计算连接设置无效。")
+        parsed = urlsplit(str(remote.get("url", "")))
+        token = str(remote.get("token", ""))
+        try:
+            port = parsed.port
+        except ValueError as error:
+            raise ToolError("电脑计算端口无效。") from error
+        if parsed.scheme != "ws" or not parsed.hostname or not port or parsed.path not in ("", "/") or parsed.query or parsed.fragment or parsed.username or parsed.password or not re.fullmatch(r"[a-f0-9]{32,64}", token):
+            raise ToolError("电脑地址需为 ws://IP:端口，且包含有效的连接密钥。")
+        result["remote"] = {"url": remote["url"].rstrip("/"), "token": token, "maxAgeMs": 120}
+    return result
 
 
 def build_patch(content: bytes, settings: dict) -> bytes:
@@ -72,7 +92,11 @@ def build_patch(content: bytes, settings: dict) -> bytes:
     config = {"base_sha256": digest(base), "settings": validate_settings(settings)}
     request = json.dumps({"action": "apply", "settings": config["settings"]}, separators=(",", ":"))
     hook = (ROOT / "guide.js").read_text(encoding="utf-8").rstrip().rstrip(";")
-    modules = "\n".join((ROOT / name).read_text(encoding="utf-8") for name in ("bank_physics.js", "live_controls.js"))
+    remote = config["settings"].get("remote")
+    names = ("shot_inputs.js", "remote_physics.js", "live_controls.js") if remote else ("shot_inputs.js", "bank_physics.js", "live_controls.js")
+    modules = "\n".join((ROOT / name).read_text(encoding="utf-8") for name in names)
+    if remote:
+        modules = "window.__poolGuideRemoteConfig=" + json.dumps(remote, separators=(",", ":")) + ";\n" + modules
     hook = "(function(){\n" + modules + "\nreturn (" + hook + ");}())"
     payload = "(function(){var attempts=0;function install(){if(typeof window.VisualGuide!=='function'){if(++attempts<2400){setTimeout(install,250);}return;}try{window.__poolGuideRequest=" + request + ";var result=(" + hook + ");window.__poolGuideLoadResult=result;if(result.ok&&result.installed){var badge=document.createElement('div');badge.id='poolguide-status';badge.textContent=result.settings.bankPrediction?'反弹预测 · 最多3次':'辅助线 '+(result.settings.mode==='fixed'?result.settings.length:result.settings.factor+'x');if(result.settings.firstHitPocket&&result.firstHitPocketReady){badge.textContent+=' · 首碰必进';}badge.style.cssText='position:fixed;right:8px;bottom:5px;z-index:2147483647;pointer-events:none;color:#79fff0;background:rgba(0,0,0,.5);padding:3px 7px;border-radius:4px;font:12px sans-serif;';document.body.appendChild(badge);}if(result.ok&&result.installed&&window.__poolGuideControls){window.__poolGuideControls.mount(window.__poolGuideExtender);}console.info('POOL_GUIDE_EXTENDER '+JSON.stringify(result));}catch(e){window.__poolGuideLoadResult={ok:false,reason:String(e)};console.error('POOL_GUIDE_EXTENDER '+e);}finally{delete window.__poolGuideRequest;}}install();}());"
     metadata = json.dumps(config, separators=(",", ":")).encode("utf-8")

@@ -67,7 +67,9 @@ function fixture(targets = [], pockets = [], options = {}) {
             pushObj(name, item) { collisions.push(item); }
         } } };
         vm.runInContext(fs.readFileSync(path.join(__dirname, 'physics-engine.fixture.js'), 'utf8'), sandbox);
-        vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'bank_physics.js'), 'utf8'), sandbox);
+        for (const file of ['shot_inputs.js', 'bank_physics.js']) {
+            vm.runInContext(fs.readFileSync(path.join(__dirname, '..', file), 'utf8'), sandbox);
+        }
     }
     const cue = new Ball(0);
     cue.position.init(40, 80);
@@ -96,8 +98,8 @@ function fixture(targets = [], pockets = [], options = {}) {
         removeEventListener(event, listener) { if (this.listeners[event] === listener) delete this.listeners[event]; }
     });
     if (options.physics) {
-        guide.visualCue = { power: 350, visible: true, setRotationRate() {},
-            cueCanvas: { englishControl: { englishX: 0, englishY: 0 } } };
+        guide._gameView.poolCanvas = {englishControl: {englishX: 0, englishY: 0}};
+        guide.visualCue = {power: 350, visible: true, setRotationRate() {}, cueCanvas: {}};
     }
     sandbox.call = (settings = {}) => {
         sandbox.__poolGuideRequest = { action: 'apply', settings: { bankPrediction: true, showSplit: true, ...settings } };
